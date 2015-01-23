@@ -1,3 +1,3 @@
 #!/bin/sh
 
-java -cp cleardep.jar:bin Build $@
+java -cp cleardep.jar:bin-java Build $@

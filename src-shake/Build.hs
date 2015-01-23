@@ -13,41 +13,44 @@ mtrace = flip trace (return ())
 
 clean = withArgs ["clean"] main
 
+build = "bin-latex"
+source = "src-latex"
+
 main :: IO ()
-main = shakeArgs shakeOptions{shakeFiles="_build/"} $ do
-    want ["_build/document.pdf"]
+main = shakeArgs shakeOptions{shakeFiles=build++"/"} $ do
+    want [build</>"document.pdf"]
 
     phony "clean" $ do
-        putNormal "Cleaning files in _build"
-        removeFilesAfter "_build" ["//*"]
-        removeFilesAfter "src" ["document.pdf", "*.aux", "*.out", "*.log"]
+        putNormal $ "Cleaning files in " ++ build
+        removeFilesAfter build ["//*"]
+        removeFilesAfter source ["document.pdf", "*.aux", "*.out", "*.log"]
 
-    ["_build/document.aux"] &%> \out -> do
-        let source = "document.tex"
-        need ["src" </> source]
-        cmd (Cwd "src") "pdflatex" "-interaction=batchmode" "-output-directory=../_build/" source
+    [build</>"document.aux"] &%> \out -> do
+        let sourceFile = "document.tex"
+        need [source </> sourceFile]
+        cmd (Cwd source) "pdflatex" "-interaction=batchmode" ("-output-directory=.."</>build++"/") sourceFile
 
-    ["_build/document.pdf"] &%> \out -> do
-        let source = "document.tex"
-        need ["src" </> source]
-        need ["_build" </> "document.bbl"]
-        Stderr e <- cmd (Cwd "src") "pdflatex" "-interaction=batchmode" "-output-directory=../_build/" "-kpathsea-debug=4" source
-        -- let openedFiles = map (prefixRelativePath "src") $ nub $ extractOpenedFiles e
+    [build</>"document.pdf"] &%> \out -> do
+        let sourceFile = "document.tex"
+        need [source </> sourceFile]
+        need [build </> "document.bbl"]
+        Stderr e <- cmd (Cwd source) "pdflatex" "-interaction=batchmode" ("-output-directory=.."</>build++"/") "-kpathsea-debug=4" sourceFile
+        -- let openedFiles = map (prefixRelativePath source) $ nub $ extractOpenedFiles e
         -- need openedFiles
         return ()
 
-    "_build/*.bib" %> \out -> do
+    build</>"*.bib" %> \out -> do
         let f = dropDirectory1 out
-        copyFile' ("src" </> f) out
+        copyFile' (source </> f) out
 
-    "_build/*.bbl" %> \out -> do
+    build</>"*.bbl" %> \out -> do
         let aux = out -<.> "aux"
         let name = dropDirectory1 $ dropExtension out
         need [aux]
         auxContent <- readFile' aux
         let bibnames = extractBibNames auxContent
-        need $ map (\bibname -> "_build" </> bibname <.> "bib") bibnames
-        cmd (Cwd "_build") "bibtex" (dropExtension name)
+        need $ map (\bibname -> build </> bibname <.> "bib") bibnames
+        cmd (Cwd build) "bibtex" (dropExtension name)
 
 
 extractOpenedFiles :: String -> [String]

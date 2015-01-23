@@ -1,3 +1,4 @@
 #!/bin/sh
-mkdir -p _shake
-ghc --make Build.hs -rtsopts -with-rtsopts=-I0 -outputdir=_shake -o _shake/build && _shake/build "$@"
+BIN=bin-shake
+mkdir -p $BIN
+ghc --make src-shake/Build.hs -rtsopts -with-rtsopts=-I0 -outputdir=$BIN -o $BIN/build && $BIN/build "$@"
