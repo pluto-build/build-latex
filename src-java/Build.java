@@ -35,8 +35,8 @@ public class Build {
     return Collections.singletonMap(sourceFile, stamper.stampOf(sourceFile));
   }
 
-  private static RelativePath build = rel("_build");
-  private static RelativePath src = rel("src");
+  private static RelativePath build = rel("bin-latex");
+  private static RelativePath src = rel("src-latex");
   
 	public static void main(String[] args) throws IOException {
 	  RelativePath tex = rel(src, "document.tex");
@@ -52,7 +52,7 @@ public class Build {
 	}
 
 	private static void clean() throws IOException {
-	  log("Clean", "Cleaning files in _build");
+	  log("Clean", "Cleaning files in " + build);
 	  FileCommands.delete(build);
 	  
 	  for (RelativePath p : FileCommands.listFiles(src))
@@ -99,7 +99,7 @@ public class Build {
 	  result.addModuleDependency(bibresult);
 	  
 	  FileCommands.createDir(build);
-	  runner.execute(src, "pdflatex", "-interaction=batchmode", "-output-directory=../_build/", FileCommands.dropDirectory(tex));
+	  runner.execute(src, "pdflatex", "-interaction=batchmode", "-output-directory=../"+FileCommands.fileName(build)+"/", FileCommands.dropDirectory(tex));
 	  
 	  RelativePath pdf = FileCommands.replaceExtension(rel(build, tex.getRelativePath()), "pdf");
 	  result.addGeneratedFile(aux);
