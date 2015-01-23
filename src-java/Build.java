@@ -11,6 +11,7 @@ import org.sugarj.common.cleardep.CompilationUnit.State;
 import org.sugarj.common.cleardep.ContentHashStamper;
 import org.sugarj.common.cleardep.SimpleCompilationUnit;
 import org.sugarj.common.cleardep.SimpleMode;
+import org.sugarj.common.cleardep.Stamp;
 import org.sugarj.common.cleardep.Stamper;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
@@ -31,7 +32,7 @@ public class Build {
     return new RelativePath(p1, p2);
   }
   
-  public static Map<RelativePath, Integer> sourceMap(RelativePath sourceFile) {
+  public static Map<RelativePath, Stamp> sourceMap(RelativePath sourceFile) {
     return Collections.singletonMap(sourceFile, stamper.stampOf(sourceFile));
   }
 
