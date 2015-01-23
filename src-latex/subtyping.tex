@@ -1,0 +1,289 @@
+\subsection{Subtyping}
+\label{sec:subtyping}
+
+As final extension, we consider a co-contextual formulation of PCF with
+subtyping. Subtyping is an interesting extension because it affects the
+semantics of a typing contexts and, hence, context requirements. In particular,
+subtyping weakens the assumptions about variable bindings $x\ofType T$ in typing
+contexts. In standard PCF, $(\ctxplus{x\ofType T_x}{\Gamma})$ means that
+variable $x$ has type $T_x$ exactly. In contrast, in PCF with subtyping,
+$(\ctxplus{x\ofType T_x}{\Gamma})$ means that $T_x$ is an upper bound of the
+type of values substitutable for $x$: All values must at least adhere to
+$T_x$. Dually, a type annotation $T_x$ on a $\lambda$-abstraction is a lower
+bound for the type required for $x$ in subexpressesions: Subexpressions can at
+most require $T_x$. Thus, subtyping affects the merging and satisfaction of
+context requirements.
+
+We adapt the definition of \reqmergeF to correctly combine requirements from
+different subexpressions. Due to subtyping, different subexpressions can require
+different types on the same variable. As consequence, a variable has to
+simultaneously satisfy the requirements of all subexpressions that refer to
+it. That is, when we merge overlapping context requirements, we require the type
+of shared variables to be a subtype of both originally required types:
+% For example, suppose type checking two separate branches of an expression yields the requirements
+% $R_{1} = \{x\ofType U_{1} \}$ and $R_{2} = \{x\ofType U_{2} \}$, i.e.,
+% $x$ is required to have at most type $U_{1}$ in one branch and at most type $U_{2}$ in the other.
+% A merge should preserve both requirements, which translates to taking the greatest lower bound
+% of the two types. That is, the merging of $R_{1}$ and $R_{2}$
+% yields $R = \{x \ofType U_{3} \}$ and the constraint $C = \{ U_{3} = U_{1} \wedge U_{2}\}$
+% for a fresh type variable $U_{3}$. That is, merging yields a more precise upper bound approximation.
+% In summary, the definition of the merge function changes as follows:\TODO{oliver}{not sure if we should add colors to the definition}
+
+\vspace{1ex}
+$
+\begin{array}{llll}
+  \multicolumn{4}{l}{  \reqmerge{\reqs_1}{\reqs_2} = \reqs|_C} \\
+  \textit{where}\ & X & = & \dom{\reqs_{1}} \cap \dom{\reqs_{2}} \\
+                  & U_x & = & \textit{fresh variable for each } {x \in  X } \\ 
+                  & \reqs & = & (\reqs_1 - \dom{\reqs_2}) \cup (\reqs_2 - \dom{\reqs_1})  \cup \{ x\ofType U_x \WHERE x \in X  \} \\
+                  & C & = & \{U_x \subtpe \reqs_1(x), U_x \subtpe \reqs_2(x) \WHERE x \in X\}
+\end{array}
+$
+\vspace{1ex}
+
+
+% Note that for simplicity we only consider a subtype relation 
+% with a greatest $\top$ type, but no least $\bot$ type \todo{seba}{necessary to mention this (and so early)?}, similarly to \cite{pierce2002types}.
+% It is straightforward to extend our co-contextual formulation with a $\bot$
+% type and obtain a complete lattice for types \todo{seba}{is it really straightforward?}.
+
+% Let us first recapitulate the changes to standard PCF for subtyping 
+% determine the impact of these changes on the co-contextual type system.
+% The rule for applications adds a subtype check, which permits more specific types as function
+% arguments than required by the function type and is defined as follows:
+% %
+% \[
+% \inference[\rulename{T-App-Alg}]{\judge{\Gamma}{e_{1}}{T_{1}\to T_{2}} & \judge{\Gamma}{e_{2}}{T_{11}} & \typecolor{T_{11}}\subtpe \typecolor{T_{1}}}{\judge{\Gamma}{\app{e_{1}}{e_{2}}}{T_{2}}.}
+% \]
+% %
+% Similarly, the rule for conditionals is more permissive by computing the least upper
+% bound (or join) of the branch types:
+% %
+% \[
+% \inference[\rulename{T-If0-Alg}]{\judge{\Gamma}{e_{1}}{\TNum} & \judge{\Gamma}{e_{2}}{T_{2}} & \judge{\Gamma}{e_{3}}{T_{3}} \\ \typecolor{T} = \typecolor{T_{2} \vee T_{3}}}{\judge{\Gamma}{\ifzero{e_{1}}{e_{2}}{e_{3}}}{T}}
+% \]
+%
+
+\noindent We do not stipulate a specific subtyping relation. However, we add new
+forms of type constraints with standard semantics to express subtyping, joins,
+and meets:
+% We assume the existence of a constraint solver supporting these constraints:
+
+\vspace{1ex}
+$
+\newcommand{\comment}[1]{\hskip2em\text{#1}}
+\begin{array}{c@{\hskip.5em}c@{\hskip.5em}lll}
+  c & ::= & \ldots 
+     &\OR  \conssub{T}{T} & \comment{subtype constraint} \\
+    & & &\OR  \consjoin{T}{T}{T} & \comment{least upper bound constraint (join)} \\
+    & & &\OR  \consmeet{T}{T}{T} & \comment{greatest lower bound constraint (meet)}
+\end{array}
+$
+\vspace{1ex}
+ 
+\noindent A least upper bound constraint $\consjoin{T_{1}}{T_{2}}{T_{3}}$ states
+that type $T_{1}$ is the least type in the subtype relation such that both
+$T_{2}$ and $T_{3}$ are subtypes of $T_{1}$. A greatest lower bound constraint
+$\consmeet{T_{1}}{T_{2}}{T_{3}}$ states that the type $T_{1}$ is the greatest
+type in the subtype relation such that both $T_{2}$ and $T_{3}$ are supertypes
+of $T_{1}$.
+
+% A property of \pcfsub{} is that for a given expression $e$, a successful type check always
+% yields the unique minimal type for $e$ in the subtype relation~\cite{pierce2002types}.
+% Accordingly, our co-contextual rules guarantee the same property.
+
+\input{copcfsub-constraint}
+
+Figure~\ref{fig:co-pcf-sub} shows the co-contextual rules for PCF enriched with
+subtyping. Only the rules for $\lambda$-abstractions, applications,
+conditionals, and fixpoints change with respect to the co-contextual PCF type system
+in Figure~\ref{fig:co-pcf}. First, consider the rule for $\lambda$-abstraction
+\rulename{T-Abs}. As discussed above, a context requirement on $x$ only
+describes an upper bound on the declared type of $x$. Or conversely, the
+declared type of a variable $x$ is a lower bound on what subexpressions can
+require for $x$. Accordingly, we replace the type-equality constraint by a
+subtype constraint $\typecolor{T_1 \subtpe \ctxcolor{R(x)}}$.
+
+The other rules \rulename{T-App}, \rulename{T-If0}, and \rulename{T-Fix} are
+straightforward extensions to allow for subtyping. In rule \rulename{T-App}, we
+allow the argument to be of a subtype of the function's parameter type as
+usual. Rule \rulename{T-If0} declares the type of the conditional to be the
+least upper bound of the two branch types, which we express by the least upper
+bound constraint $\consjoin{U}{T_{1}}{T_{2}}$. In rule \rulename{T-Fix}, we
+permit the fixed function to produce values whose type is a subtype of the
+function's parameter type.
+
+To illustrate co-contextual type checking with subtypes, consider PCF with
+records and the usual depth and with subtyping for records. When type checking
+the expression $e = \add{x.m}{x.n}$ with free $x$, we get the following
+derivation:
+
+\begin{center}
+\begin{tikzpicture}[exp tree]
+  \node (add) at (0,4) {\addNode};
+  \node (m) at (-2.5,2.5) {$.m$};
+  \node (x1) at (-2.5,1.0) {$x$};
+  \node (n) at (2.5,2.5) {$.n$};
+  \node (x2) at (2.5,1.0) {$x$};
+
+  % \node[type node, right=of lambda-f] (lambda-f-type) {\typeNode{(\alpha\to\beta) \to \alpha \to \beta}};
+  % \node[ctx node, right=of lambda-f-type]  (lambda-f-ctx)  {\coctxNode{\emptyset}};
+  % \node[type node, right=of lambda-x] (lambda-x-type) {\typeNode{\alpha \to U_2}};
+  % \node[ctx node, right=of lambda-x-type]  (lambda-x-ctx)  {\coctxNode{f \ofType \alpha \to U_2}};
+  % \node[type node,right=of app] (app-type) {\typeNode{U_2}};
+  % \node[ctx node, right=of app-type]  (app-ctx)  {\coctxNode{\coctxplus{f \ofType U_1 \to U_2}{x \ofType U_1}}};
+  % \node[type node,right=of f] (f-type) {\typeNode{U_0}};
+  % \node[ctx node, right=of f-type]  (f-ctx)  {\coctxNode{f \ofType U_0}};
+  \annotateNode{x1}{U_1}{\emptyset}{x \ofType U_1}
+  \annotateNode{x2}{U_2}{\emptyset}{x \ofType U_2}
+  \annotateNode{m}{U_3}{\{U_3 = U_1.m\}}{x \ofType U_1}
+  \annotateNode{n}{U_4}{\{U_4 = U_2.n\}}{x \ofType U_2}
+  \annotateNode{add}{\TNum}{%
+    \begin{array}{lll}
+      \{ & U_3 = U_1.m, U_4 = U_2.n & \\
+         & U_3 = \TNum, U_4 = \TNum & \\
+         & U_5 \subtpe U_1, U_5 \subtpe U_2 & \} \\
+    \end{array}
+}{x \ofType U_5}
+
+ \path (add) edge (m);
+ \path (add) edge (n);
+ \path (m) edge (x1);
+ \path (n) edge (x2);
+
+
+\end{tikzpicture}
+\end{center}
+
+\noindent We can simplify the resulting constraint set by eliminating $U_3$ and
+$U_4$ to get $\{\TNum = U_1.m, \TNum = U_2.n, U_5 \subtpe U_1, U_5 \subtpe
+U_2\}$, where $U_5$ is the type required for $x$. Importantly, the type of $x$
+must be a subtype of $U_1$ and $U_2$, which in turn must provide fields $m$ and
+$n$ respectively. Thus, the type $U_5$ of $x$ must be a record type that at
+least provides fields $m$ and $n$. Indeed, when we close above expression $e$ as
+in $\abs{x}{T}{e}$, type rule \rulename{T-Abs} yields another constraint $T
+\subtpe U_5$. Accordingly, type checking succeeds for an annotation $T=\{m
+\ofType \TNum, n \ofType \TNum, o \ofType \TNum \to \TNum\}$. But type checking
+correctly fails for an annotation $T=\{m \ofType \TNum\}$, because $T \subtpe
+U_2$ by transitivity such that $\TNum = U_2.n$ is not satisfiable.
+
+% In the following, we demonstrate how our co-contextual type system works by a concrete example.
+% For the example, we assume an extended language with additional numeric types $\TReal$, $\TFloat$
+% such that $\TFloat\subtpe\TReal$ and $\TNum\subtpe\TFloat$ hold
+% in the subtype relation. This leads to a more interesting typing rule for addition, which
+% assigns the most precise numeric type possible, depending on the argument types:
+% $$
+% \inference[\rulename{T-Add}]
+%         {\cojudge {e_1} {T_1} {C_1} {\reqs_1} &
+%          \cojudge {e_2} {T_2} {C_2} {\reqs_2} &
+%          \ctxcolor{\reqmerge{\reqs_1}{\reqs_2} = \reqs|_{\typectxcolor{C}}} & \fresh{U}}
+%         {\cojudge {\add{e_1}{e_2}} {U} {C_1 \cup C_2 \cup \{T_1 \subtpe \TReal, T_2 \subtpe \TReal, \consjoin{U}{T_{1}}{T_{2}}\} \cup \typectxcolor{C}} {\reqs}}.
+% $$
+% We further consider another primitive operation $\mathit{sqrt}$ with accompanying type rule:
+% $$
+% \inference[\rulename{T-Sqrt}]
+%         {\cojudge {e} {T} {C} {\reqs} }
+%         {\cojudge {\mathit{sqrt}(e)} {\TReal} {C \cup \{T \subtpe \TReal\}} {\reqs}}.
+% $$
+% Now assume we type-check the expression $\mathit{sqrt}(x) + x$ bottom-up, which results in the following constraints
+% and requirements:
+% \begin{center}
+% \begin{tikzpicture}[exp tree]
+%   \node (plus) at (1,3) {$+$};
+%   \node (sqrt) at (-2.5,0.5) {$\mathit{sqrt}$};
+%   \node (sqrt-x) at (-2.5,-1.0) {$x$};
+%   \node (x) at (4.5,0.5) {$x$};
+
+%   \annotateNode{sqrt-x}{U_{0}}{\emptyset}{x \ofType U_{0}} 
+%   \annotateNode{x}{U_{1}}{\emptyset}{x \ofType U_{1}}
+%   \annotateNode{sqrt}{\TReal}{\{U_{0} \subtpe \TReal\}}{x \ofType U_{0}}
+%   \annotateNode{plus}{U_{3}}{%
+%     \begin{array}{lll}
+%       \multicolumn{3}{l}{\vspace{3ex}} \\
+%       \{ &U_{0} & \subtpe \TReal, \\
+%          & \TReal & \subtpe \TReal, \\
+%       & U_{1} & \subtpe \TReal, \\
+%       & U_{2} & = U_{0}\wedge U_{1}, \\
+%      &  U_{3} & = \TReal \vee U_{1}\}
+%     \end{array}%
+% }{x \ofType U_{2}}
+%   % \node[type node, right=of plus] (plus-type) {\typeNode{\TNumeric}};
+%   % \node[ctx node, right=of plus-type] (plus-cons) {\consNode{\{ U_{0} = \TFloat, }};
+%   % \node[ctx node, below=of plus-cons] (plus-cons1) {\consNode{U_{1} = \TNumeric, }};
+%   % \node[ctx node, below=of plus-cons1] (plus-cons2) {\consNode{ \consmeet{U_{2}}{U_{0}}{U_{1}}  \} }};
+%   % \node[ctx node, right=of plus-cons] (plus-req) {\reqNode{x \ofType U_{2}}};
+
+%  \path (plus) edge (x);
+%  \path (plus) edge (sqrt);
+%  \path (sqrt) edge (sqrt-x);
+% \end{tikzpicture}
+% \end{center}
+% The topmost constraint set is the result of merging the requirements and constraints of the two branches, which both
+% yield requirements on variable $x$. From the rule for $\mathit{sqrt}$, we obtain the constraint $U_{0} \subtpe \TFloat$.
+% From the refined addition rule, we obtain constraints on the two children of $+$. Both types must be subtypes of $\TReal$
+% and the resulting type is their least upper bound $U_{3}$.
+% Note the resulting greatest lower bound constraint $U_{2} = U_{0} \wedge U_{1}$, which is in accordance to our
+% refined merge operator. Variable $x$ must have at most the types required in the branches to
+% ensure consistent usage.
+% At this point, we can simplify the constraint set by eliminating the ground constraint $\TReal\subtpe\TReal$ (which
+% vacuously holds) to the equivalent set
+% \begin{align*}
+%   \typecolor{C = } & \typecolor{\{ U_{0}\subtpe\TReal, U_{1}\subtpe \TReal, U_{2} = U_{0}\wedge U_{1}, U_{3} = \TReal \vee U_{1} \}}, 
+% \end{align*}
+% which we will use throughout the remainder of the example.
+
+% The term is not well-typed, since there are unsatisfied requirements left for $x$.
+% Now suppose we close the expression with a lambda abstraction as follows:
+% \begin{center}
+% \begin{tikzpicture}[exp tree]
+%   \node (lambdax) at (1,4) {$\lambda x\ofType \TFloat.$};
+%   \node (plus) at (1,3) {$+$};
+%   \node (dotdotl) at (0,2.2) {$\ldots$};
+%   \node (dotdotr) at (2,2.2) {$\ldots$};
+
+%   \annotateNode{plus}{U_{3}}{\ldots}{x \ofType U_{2}}
+%   \annotateNode{lambdax}{\TFloat \to U_{3}}{C\cup\{\TFloat\subtpe U_{2} \}}{\emptyset}
+ 
+%  \path (lambdax) edge (plus);
+%  \path (plus) edge (dotdotl);
+%  \path (plus) edge (dotdotr);
+% \end{tikzpicture}
+% \end{center}
+% The result is well-typed, since there are no requirements left and 
+% the constraint set $C\cup\{\TFloat\subtpe U_{2} \}$ has a solution
+% $U_{3} = \TReal$ and $U_{1} = T_{1}$, $U_{2} = T_{2}$, where $T_{1}, T_{2}\in\{\TReal, \TFloat, \TNum\}$
+% can be chosen arbitrarily. The type of the entire expression is thus $\TFloat \to\TReal$.
+
+
+% On the other hand, changing the type of $x$ to the more general $\TNumeric$
+% yields the following constraints:
+% \begin{center}
+% \begin{tikzpicture}[exp tree]
+%   \node (lambdax) at (1,4) {$\lambda x\ofType \TNumeric.$};
+%   \node (plus) at (1,3) {$+$};
+%   \node (dotdotl) at (0,2.2) {$\ldots$};
+%   \node (dotdotr) at (2,2.2) {$\ldots$};
+
+%   \annotateNode{plus}{\TNumeric}{\ldots}{x \ofType U_{2}}
+%   \annotateNode{lambdax}{\TNumeric \to \TNumeric}{C\cup\{\TNumeric\subtpe U_{2}\}}{\emptyset}
+% %=======
+% %\TODO{oliver}{I compared to fig~\ref{fig:co-pcf} instead of \ref{fig:pcf-original-constraint}, is this OK?}
+% %\todo{mira}{yes}
+% %>>>>>>> Stashed changes
+
+ 
+%  \path (lambdax) edge (plus);
+%  \path (plus) edge (dotdotl);
+%  \path (plus) edge (dotdotr);
+% \end{tikzpicture}
+% \end{center}
+% The term is ill-typed, since the constraint set is unsatisfiable.
+% From the constraints $U_{0} = \TFloat$, $U_{2} = U_{0} \wedge U_{1}$ it must hold that $U_{2} = \TFloat \wedge U_{1}$.
+% Together with the definition of the greatest lower bound we obtain $\TFloat \wedge U_{1} \subtpe \TFloat$, i.e.\,
+% $U_{2}\subtpe \TFloat$. By the constraint $\TNumeric \subtpe U_{2}$ it follows that $\TNumeric \subtpe \TFloat$, which
+% is false.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "document"
+%%% End:

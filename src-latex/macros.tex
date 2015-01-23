@@ -1,0 +1,218 @@
+\newcommand{\mynote}[2]{
+  \textcolor{red}{%
+    {\bfseries\sffamily\scriptsize#1}%
+    {\small$\blacktriangleright$\textsf{\emph{#2}}$\blacktriangleleft$}}%
+}
+
+\newcommand{\todo}{\TODO}
+\newcommand{\TODO}{\mynote}
+\newcommand{\NOTE}{\mynote}
+
+\newcommand{\TVar}[1]{#1^\ast}
+
+
+\newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}} % zentrierte Spalten mit Breitenangabe 
+\newcolumntype{P}[1]{>{\arraybackslash}m{#1}} % zentrierte Spalten mit Breitenangabe 
+\newcommand{\mhline}{}
+
+% \newtheorem{definition}{Definition}{\bfseries}{\itshape}
+% \newtheorem{lemma}{Lemma}{\bfseries}{\itshape}
+% \newtheorem{theorem}{Theorem}{\bfseries}{\itshape}
+\newtheorem{innercustomthm}{Theorem}
+\newenvironment{customtheorem}[1]
+  {\renewcommand\theinnercustomthm{#1}\innercustomthm}
+  {\endinnercustomthm}
+
+% \newenvironment{itemize*}{%
+%   \begin{itemize}\addtolength{\itemsep}{-.35\baselineskip}}{%
+%   \end{itemize}}
+% \newenvironment{enumerate*}{%
+%   \begin{enumerate}\addtolength{\itemsep}{-.35\baselineskip}}{%
+%   \end{enumerate}}
+% \newenvironment{description*}{%
+%   \begin{description}\addtolength{\itemsep}{-.35\baselineskip}}{%
+%   \end{description}}
+
+\newcommand{\sm}[1]{{\small #1}}
+
+\makeatletter
+\newcommand*{\mycleardoublepage}{\clearpage\if@twoside
+\ifodd\c@page
+  \hbox{}
+%  \thispagestyle{empty}
+  \clearpage
+\fi
+\hbox{}
+\thispagestyle{empty}
+\clearpage
+\fi}
+\makeatother
+
+
+\newcounter{MOPReqCounter}
+\newcommand{\MOPrequirement}[1]{
+\begin{list}{\bfseries (R\arabic{MOPReqCounter})}{
+\addtocounter{MOPReqCounter}{1}
+\setlength\labelwidth{\widthof{\textbf{(RM)}}}
+\addtolength\leftmargin{1.5em}
+\addtolength{\itemsep}{-.35\baselineskip}
+}
+\item #1
+\end{list}
+}
+
+
+\newcommand\positive{\tikz{\path [draw, fill] circle (0.7ex);}}
+\newcommand\negative{\tikz{\path [draw] circle (0.7ex);}}
+\newcommand\mixed{\tikz{\path [draw] (0,0) arc (0:180:0.7ex); \path [draw, fill] (0,0) arc (360:180:0.7ex);}}
+
+
+
+%%%%%%%%%%%%%%%%%%%%
+%% subfigure hackery
+%%%%%%%%%%%%%%%%%%%%
+
+% \captionsetup[subfigure]{labelfont=normal}
+
+% lists
+\makeatletter
+\def\list@empty#1{}
+\def\list@add#1#2{\edef#1##1{#1{##1}##1{#2}}}
+\def\list@iterate#1#2{#1{#2}}
+\makeatother
+
+% subfigure environment
+% (adapted from the subfigure package's documentation, section 4.7.4).
+
+\makeatletter
+\let\sfoldsubfigure=\subfigure
+\let\sf@oldsubfigure=\subfigure
+\let\subfigure=\thisisnotdefined
+\let\sfenv@beginSubfigure=\relax
+\let\sfenv@endSubfigure=\relax
+\let\sfenv@beforeSubfigure=\relax
+\let\sfenv@afterSubfigure=\relax
+\newbox\subfigbox % Create a box to hold the subfigure.
+\newenvironment{subfigure}% % Create the new environment.
+{\def\caption##1{\gdef\subcapsave{\relax##1}}%
+\let\subcapsave=\@empty % Save the subcaption text.
+\let\sf@oldlabel=\label
+\def\label##1{\global\list@add{\sublabsave}{##1}}
+\let\sublabsave\list@empty % Save a list of label keys.
+\setbox\subfigbox\hbox\bgroup\sfenv@beginSubfigure}% % Open the box...
+{\sfenv@endSubfigure\egroup % ... close the box and call \subfigure.
+\let\label=\sf@oldlabel
+\sfenv@beforeSubfigure%
+\sf@oldsubfigure[\subcapsave\list@iterate\sublabsave\label]{\box\subfigbox}}%
+\sfenv@afterSubfigure%
+\makeatother
+
+% horizontal environment
+% (to produce two columns of subfigures}
+
+\makeatletter
+\newenvironment{horizontal}
+{\def\sfenv@beginSubfigure{\begin{minipage}{0.45\linewidth}}
+\def\sfenv@endSubfigure{\end{minipage}}
+\def\sfenv@beforeSubfigure{\hfil}
+\def\sfenv@afterSubfigure{\hfil}}%
+{\hfil}
+\makeatother
+
+% horizontal environment
+% (to produce three columns of subfigures}
+
+\makeatletter
+\newenvironment{threecolumns}
+{\def\sfenv@beginSubfigure{\begin{minipage}[b]{0.30\linewidth}}
+\def\sfenv@endSubfigure{\end{minipage}}
+\def\sfenv@beforeSubfigure{\hfil}
+\def\sfenv@afterSubfigure{\hfil}}%
+{\hfil}
+\makeatother
+
+
+% vertical environment
+% (to produce rows of subfigures}
+
+\makeatletter
+\newenvironment{vertical}
+{\def\sfenv@beginSubfigure{\begin{minipage}{\linewidth}}
+\def\sfenv@endSubfigure{\end{minipage}}
+\def\sfenv@beforeSubfigure{}
+\def\sfenv@afterSubfigure{}}%
+{}
+\makeatother
+
+
+%%%%%%%%%
+%% colors
+%%%%%%%%%
+
+% \definecolor{myblue}{cmyk}{.8,.4,0,0}
+% \definecolor{myred}{cmyk}{0,.95,.9,0}
+% \definecolor{mypurple}{cmyk}{.3,.0,.3,0}
+\colorlet{myblue}{blue}
+\colorlet{myred}{red}
+\colorlet{mypurple}{violet!150!black}
+\colorlet{mygreen}{green!40!black}
+\newcommand{\textblue}{\textcolor{myblue}}
+\newcommand{\textred}{\textcolor{myred}}
+\newcommand{\textpurple}{\textcolor{mypurple}}
+\newcommand{\textgreen}{\textcolor{mygreen}}
+
+
+\newenvironment{indented}[1][]%
+{\noindent
+ \begin{itemize}
+ \item[#1]}%
+{\end{itemize}}
+
+\newcommand{\designGoal}[2]{%
+  \begin{indented}
+    \textit{#1}: #2%
+  \end{indented}
+}
+
+\newcounter{goal}{}
+\setcounter{goal}{0}
+\newcommand{\getGoal}[1][\arabic{goal}]{\textbf{(DG#1)}}
+\newcommand{\nextGoal}{%
+  \addtocounter{goal}{1}%
+  \getGoal}
+
+
+%%%%%%%%%%%%%%%
+%% case studies
+%%%%%%%%%%%%%%%
+
+\newenvironment{casestudy}{%
+\ifx \restwidth \undefined
+  \newlength{\restwidth}
+\fi
+\ifx \parparindent \undefined
+  \newlength{\parparindent}
+\fi
+\setlength{\parparindent}{\parindent}
+\setlength{\restwidth}{\linewidth}
+\addtolength{\restwidth}{-\parindent}
+%
+\newcommand{\version}[1]{\colchunk{Version:}\colchunk{##1}\colplacechunks\vskip0.2em}
+\newcommand{\developedBy}[1]{\colchunk{Developed by:}\colchunk{##1}\colplacechunks\vskip0.2em}
+\newcommand{\size}[1]{\colchunk{Size:}\colchunk{##1}\colplacechunks\vskip0.2em}
+\renewcommand{\description}[1]{\colchunk{Description:}\colchunk{##1}\colplacechunks\vskip0.2em}
+\newcommand{\result}[1]{\colchunk{Results:}\colchunk{##1}\colplacechunks}
+%
+\renewcommand{\indent}{\hskip\parparindent}
+%
+\begin{parcolumns}[colwidths={1=0.17\linewidth},distance=1em]{2}
+\parindent=0pt
+}{%
+\end{parcolumns}
+}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "document"
+%%% End: 

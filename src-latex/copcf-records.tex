@@ -1,0 +1,24 @@
+\begin{figure}[t]
+  \centering
+  {
+  \begin{gather*}
+      \inference[\rulename{T-Record}]
+        {\cojudge {e_i} {T_i} {C_i} {\reqs_i} \ \ \text{for } i \in 1 \ldots n \\
+         \ctxcolor{\reqs'_1 = \reqs_1} &
+         \ctxcolor{\reqs'_{j}|_{\typectxcolor{C'_{j}}} = \reqmerge{\reqs'_{j-1}}{\reqs_{j}}} \ \  \text{for } j \in 2 \ldots n}
+        {\cojudge {\record{l_i}{e_i}{i}{1}{n}} {\TRecord{l_i}{T_i}{i}{1}{n}} {\bigcup_{i \in 1 \ldots n} C_i \cup \typectxcolor{\bigcup_{j \in 2 \ldots n} C'_j}} {\reqs'_n}}
+\\[2ex]
+      \inference[\rulename{T-Lookup}]
+        {\cojudge {e} {T} {C} {\reqs} &
+         \fresh{U}}
+        {\cojudge {e.l} {U} {C \cup \{T.l = U\}} {\reqs}}
+\end{gather*}
+}
+  \caption{Co-contextual type rules for records.}
+  \label{fig:co-pcf-records}
+\end{figure}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "document"
+%%% End:

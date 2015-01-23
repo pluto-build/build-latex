@@ -1,0 +1,41 @@
+\begin{figure}[t]
+  \centering
+  {
+  \begin{gather*}
+      \inference[\rulename{T-Num}]
+        {}
+        {\judgeC {\Gamma} {n} {\TNum} {\emptyset}}
+\hskip2em 
+      \inference[\rulename{T-Var}]
+        {\ctxcolor{\Gamma(x)} = \typecolor{T}}
+        {\judgeC {\Gamma} {x} {T} {\emptyset}}
+\\[2ex]
+      \inference[\rulename{T-Abs}]
+        {\judgeC {\ctxplus{\Gamma}{x \ofType T_1}} {e} {T_2} {C}}
+        {\judgeC \Gamma {\abs{x}{T_1}{e}} {T_1 \to T_2} {C}}
+\hskip2em
+      \inference[\rulename{T-Fix}]
+        {\judgeC {\Gamma} {e} {T} {C} & \fresh{U}}
+        {\judgeC \Gamma {\fix{e}} {U} {C \cup \{T = U \to U\}}}
+\\[2ex]
+      \inference[\rulename{T-App}]
+        {\judgeC {\Gamma} {e_1} {T_1} {C_1} &
+         \judgeC {\Gamma} {e_2} {T_2} {C_2} &
+         \fresh{U}}
+        {\judgeC \Gamma {\app{e_1}{e_2}} {U} {C_1 \cup C_2 \cup \{T_1 = T_2 \to U\}}}
+\\[2ex]
+      \inference[\rulename{T-Add}]
+        {\judgeC {\Gamma} {e_1} {T_1} {C_1} &
+         \judgeC {\Gamma} {e_2} {T_2} {C_2}}
+        {\judgeC {\Gamma} {\add{e_1}{e_2}} {\TNum} {C_1 \cup C_2 \cup \{T_1 = \TNum, T_2 = \TNum\}}}
+\\[2ex]
+      \inference[\rulename{T-If0}]
+        {\judgeC {\Gamma} {e_1} {T_1} {C_1} &
+         \judgeC {\Gamma} {e_2} {T_2} {C_2} &
+         \judgeC {\Gamma} {e_3} {T_3} {C_3}}
+        {\judgeC {\Gamma} {\ifzero{e_1}{e_2}{e_3}} {T_2} {C_1 \cup C_2 \cup C_3 \cup \{T_1 = \TNum, T_2 = T_3\}}}
+  \end{gather*}
+  }
+  \caption{A contextual constraint-based formulation of the type system of PCF.}
+  \label{fig:pcf-original-constraint}
+\end{figure}

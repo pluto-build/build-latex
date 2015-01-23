@@ -1,0 +1,259 @@
+\definecolor{keyword}{RGB}{96,0,53}
+\definecolor{darkgreen}{RGB}{0,128,0}
+\definecolor{listingsFrame}{gray}{0.6}
+
+\newcommand{\fboxgray}[1]{%
+    \colorlet{currentcolor}{.}%
+    {\color{listingsFrame}%
+    \fbox{\color{currentcolor}#1}}%
+}
+
+%%%%%%%%%%
+%% styles
+%%%%%%%%%%
+
+\lstdefinestyle{normal}{%
+  xleftmargin=\parindent,
+}
+
+\lstdefinestyle{nospace}{%
+  aboveskip=0em,
+  belowskip=0em,
+  xleftmargin=0em,
+  xrightmargin=0em,
+%  basicstyle=\tiny\sf,
+}
+
+\lstdefinestyle{nohspace}{%
+  xleftmargin=0em,
+  xrightmargin=0em,
+}
+
+
+\lstdefinestyle{scriptsize}{%
+  basicstyle=\scriptsize\sf,
+}
+
+\lstdefinestyle{footnote}{%
+  basicstyle=\footnotesize\sf,
+}
+
+\lstdefinestyle{figureframe}{%
+  xleftmargin=0pt,
+  frame=single,
+  rulecolor=\color{listingsFrame},
+  numbersep=6pt,
+}
+\lstdefinestyle{inlineframe}{%
+  xleftmargin=2pt,
+  xrightmargin=2pt,
+  frame=single,
+  rulecolor=\color{listingsFrame},
+  numbersep=6pt,
+}
+
+
+%%%%%%%%%%%%
+%% languages
+%%%%%%%%%%%%
+
+\newcommand{\mytilde}{%
+  \texttt{\resizebox{.48em}{1ex}{\hbox{$\sim$}}}%
+}
+
+\lstset{%
+  columns=fullflexible,
+  keepspaces=true,
+  %basicstyle=\small\sf,
+  basicstyle=\sffamily\small,
+  % numberstyle=\tiny\ttfamily,
+  showspaces=false,
+  showstringspaces=false,
+  style=normal,
+  keywordstyle=\bfseries,
+  stringstyle=\tt,% \color{blue}
+  %commentstyle=\it\color{gray},
+%
+   literate={
+    {˚}{{\texttt{\space}}}{1}
+    {~}{{\mytilde}}{1}
+    {=}{{\texttt{=}}}{1}
+    {:}{{\texttt{:}}}{1}
+    {-}{{\texttt{-}}}{1}
+    {_}{{\texttt{\_}}}{1}
+    {<}{{\texttt{<}}}{1}
+    {>}{{\texttt{>}}}{1}   
+    {+}{{\texttt{+}}}{1} 
+    {*}{{\texttt{*}}}{1}
+ %   {/}{{\texttt{/}}}{1}
+    {|}{{\texttt{|}}}{1}
+    {\&}{{\texttt{\&}}}{1}
+   },
+%  escapechar=\%,
+  escapeinside={(@*}{*@)}
+}
+\newcommand{\lststring}[1]{{\tt\color{blue} #1}}
+\newcommand{\lstmeta}[1]{{\it\color{darkgreen} #1}}
+
+\lstdefinelanguage{LaTeX}[]{Tex}{%
+  language=Tex,
+  morekeywords={emph, label, ref, begin, end, part, chapter, section,
+                subsection, subsubsection, paragraph, subparagraph, cite},
+}
+
+
+\lstdefinelanguage{SugarJ}[]{Java}{%
+  language=Java,
+  morekeywords={sugar, extension, context, free, syntax, desugarings, sorts, signature,
+    constructors, rules, strategies, assert, as, editor, services, colorer, folding,
+    outliner, checks, recursive, errors, warnings, where,
+    css, outlining, rec, color, completions, completion, template,
+    layout, analyses, then},
+  mathescape=true,
+  deletestring=[b]',
+  morecomment=[l]{//},
+}
+
+\lstdefinelanguage{SugarJXML}[]{SugarJ}{%
+  deletecomment=[l]{//},
+  morecomment=[s]{<!--}{-->}
+}
+
+\lstdefinelanguage{SugarMDD}[]{SugarJ}{%
+  morekeywords={model, transformation},
+}
+
+\lstdefinelanguage{SugarJATM}[]{SugarMDD}{%
+  morekeywords={statemachine, initial, state, events},
+}
+
+\lstdefinelanguage{SugarJEntity}[]{SugarMDD}{%
+  morekeywords={entity},
+}
+\lstdefinelanguage{SugarJATMEntity}[]{SugarJATM}{%
+  morekeywords={data, entity},
+}
+
+\lstdefinelanguage{SugarJTemplate}[]{SugarMDD}{%
+  morekeywords={in, \$for, template},
+  mathescape=false
+}
+
+\lstdefinelanguage{SugarJFeature}[]{SugarMDD}{%
+  morekeywords={featuremodel, features, constraint, config, enable, disable, variable},
+  otherkeywords={\#ifdef},
+}
+
+
+\lstdefinelanguage{scala}{
+  morekeywords={abstract,case,catch,class,def,%
+    do,else,extends,false,final,finally,%
+    for,if,implicit,import,match,mixin,%
+    new,null,object,override,package,%
+    private,protected,requires,return,sealed,%
+    super,this,throw,trait,true,try,%
+    type,val,var,while,with,yield},
+%  otherkeywords={=>,<-,<\%,<:,>:,\#,@},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[n]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]"""
+}
+
+
+\lstdefinelanguage{SDF}{%
+  morekeywords={context, free, syntax, sorts, signature,
+    constructors, rules, strategies, module, imports, exports},
+  escapechar=_,
+  mathescape=true,
+  comment=[l]{\%\%},
+  morestring=[b]",
+}
+
+\lstdefinelanguage{MyPython}[]{Python}{%
+  escapechar=\%,
+  mathescape=true,
+}
+
+\lstdefinelanguage{MyHaskell}[]{Haskell}{%
+  escapechar=\%,
+  mathescape=true,
+  deletekeywords={Nothing,Just,False,True,putStrLn,fail,fromJust,lookup,Num,exp,free,snd,String,
+  return,error,otherwise,not,show,read,Eval,Read,readsPrec,print},
+}
+
+
+\lstdefinelanguage{SugarHaskell}[]{MyHaskell}{%
+  morekeywords={context, free, syntax, desugarings, sorts, signature,
+    constructors, rules, strategies, lexical, reject},
+  mathescape=false,
+}
+
+\lstdefinelanguage{SugarHaskellArrows}[]{SugarHaskell}{%
+  morekeywords={proc},
+}
+
+
+\lstdefinelanguage{EBNF}{
+  morestring=[b]"
+}
+
+
+\lstdefinelanguage{Constraint}{
+% %  columns=spaceflexible,
+%   literate={
+%    {"}{{\texttt{"}}}{1}
+%    {~}{{\texttt{ }}}{1}
+%    {=}{{\texttt{=}}}{1}
+%    {:}{{\texttt{:}}}{1}
+%    {-}{{\texttt{-}}}{1}
+%    {<}{{\texttt{<}}}{1}
+%    {>}{{\texttt{>}}}{1}   
+%    {+}{{\texttt{+}}}{1} 
+%    {*}{{\texttt{*}}}{1}
+%    {/}{{\texttt{/}}}{1}
+%    {|}{{$\mid$}}{1}
+%    {||}{{\texttt{||}}}{2}
+%    {\&}{{\texttt{\&}}}{1}
+%    {c}{{\it c}}{1}
+%    {col}{{\texttt{col}}}{3}
+%    {pmc}{pmc}{3}
+%    {atomically}{atomically}{10}
+%    {::=}{{\rm ::=}}{3}
+%    {nat}{{\it number}}{6}
+%   },
+}
+
+
+\lstdefinelanguage{Plain}{}
+
+\lstdefinelanguage{Pseudo}{
+  keywords={foreach,match,case,in,return,if,else},
+  mathescape=true,
+}
+
+\lstdefinelanguage{Questionnaire}[]{Java}{%
+  morekeywords = {questionnaire, question, value, Boolean, String, Integer, group,
+    if, else, define, ask}
+}
+
+\newcommand{\lstplain}{\lstinline[language=Plain]}
+
+
+%%% SugarFomega
+\lstdefinelanguage{SugarFomega}{
+  keywords = {module, val, type, mu, if, then, else, case, of,
+    fold, unfold, true, false, as, public, import, syntax, desugaring, typing, context, free, let, in, end, forall, do},
+  mathescape = true,
+  morestring=[b]",
+}
+\newcommand{\sfo}{\lstinline[language=SugarFomega,basicstyle=\upshape\ttfamily\normalsize]}
+
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "document"
+%%% End: 

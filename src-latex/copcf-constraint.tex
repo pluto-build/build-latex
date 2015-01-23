@@ -1,0 +1,52 @@
+\begin{figure}[t]
+  \centering
+  {
+  \begin{gather*}
+      \inference[\rulename{T-Num}]
+        {}
+        {\cojudge {n} {\TNum} {\emptyset} {\emptyset}}
+\hskip2em
+      \inference[\rulename{T-Var}]
+        {\fresh{U}}
+        {\cojudge {x} {U} {\emptyset} {x \ofType U}}
+\\[2ex]
+      \inference[\rulename{T-Abs}]
+        {\cojudge {e} {T_2} {C} {\reqs} \\
+         \typectxcolor{C_x} = \{\typecolor{T_1} \typecolor{=} \ctxcolor{\reqs(x)} \OR \textit{if}\ \ctxcolor{x \in \dom{\reqs}}\}}
+        {\cojudge {\abs{x}{T_1}{e}} {T_1 \to T_2} {C \cup \typectxcolor{C_x}} {\reqs - x}}
+\hskip1em
+      \inference[\rulename{T-Fix}]
+        {\cojudge {e} {T} {C} {\reqs} &
+         \fresh{U}}
+        {\cojudge {\fix{e}} {U} {C \cup \{T = U \to U\}} {\reqs}}
+\\[2ex]
+      \inference[\rulename{T-App}]
+        {\cojudge {e_1} {T_1} {C_1} {\reqs_1} &
+         \cojudge {e_2} {T_2} {C_2} {\reqs_2} \\
+         \fresh{U} &
+         \ctxcolor{\reqmerge{\reqs_1}{\reqs_2} = \reqs|_{\typectxcolor{C}}}}
+        {\cojudge {\app{e_1}{e_2}} {U} {C_1 \cup C_2 \cup \{T_1 = T_2 \to U\} \cup \typectxcolor{C}} {\reqs}}
+\\[2ex]
+      \inference[\rulename{T-Add}]
+        {\cojudge {e_1} {T_1} {C_1} {\reqs_1} &
+         \cojudge {e_2} {T_2} {C_2} {\reqs_2} &
+         \ctxcolor{\reqmerge{\reqs_1}{\reqs_2} = \reqs|_{\typectxcolor{C}}}}
+        {\cojudge {\add{e_1}{e_2}} {\TNum} {C_1 \cup C_2 \cup \{T_1 = \TNum, T_2 = \TNum\} \cup \typectxcolor{C}} {\reqs}}
+\\[2ex]
+      \inference[\rulename{T-If0}]
+        {\cojudge {e_1} {T_1} {C_1} {\reqs_1} &
+         \cojudge {e_2} {T_2} {C_2} {\reqs_2} &
+         \cojudge {e_3} {T_3} {C_3} {\reqs_3} \\
+         \ctxcolor{\reqmerge{\reqs_2}{\reqs_3} = \reqs_{2,3}|_{\typectxcolor{C_{2,3}}}} &
+         \ctxcolor{\reqmerge{\reqs_1}{\reqs_{2,3}} = \reqs_{1,2,3}|_{\typectxcolor{C_{1,2,3}}}}}
+        {\cojudge {\ifzero{e_1}{e_2}{e_3}} {T_2} {C_1 \cup C_2 \cup C_3 \cup \{T_1 = \TNum, T_2 = T_3\} \cup \typectxcolor{C_{2,3}} \cup \typectxcolor{C_{1,2,3}}} {\reqs_{1,2,3}} }
+\end{gather*}
+}
+  \caption{A co-contextual constraint-based formulation of the type system of PCF.}
+  \label{fig:co-pcf}
+\end{figure}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "document"
+%%% End:
