@@ -10,6 +10,9 @@ import org.sugarj.common.path.Path;
 
 public class BibtexSourceStamper implements Stamper {
   
+  public static BibtexSourceStamper instance = new BibtexSourceStamper();
+  private BibtexSourceStamper() { }
+  
   @Override
   public Stamp stampOf(Path p) {
     String content;
@@ -52,6 +55,11 @@ public class BibtexSourceStamper implements Stamper {
       Set<String> ocitations = ((BibtexSourceStamp) o).citations;
       return citations == null && ocitations == null 
           || citations.equals(ocitations);
+    }
+
+    @Override
+    public Stamper getStamper() {
+      return BibtexSourceStamper.instance;
     }
 
 

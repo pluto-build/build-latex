@@ -8,7 +8,7 @@ import org.sugarj.common.CommandExecution;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.cleardep.CompilationUnit;
 import org.sugarj.common.cleardep.CompilationUnit.State;
-import org.sugarj.common.cleardep.ContentHashStamper;
+import org.sugarj.common.cleardep.LastModifiedStamper;
 import org.sugarj.common.cleardep.SimpleCompilationUnit;
 import org.sugarj.common.cleardep.SimpleMode;
 import org.sugarj.common.cleardep.Stamp;
@@ -21,7 +21,7 @@ import org.sugarj.common.path.RelativePath;
 public class Build {
 
   public static CommandExecution runner = new CommandExecution(false);
-  public static Stamper stamper = ContentHashStamper.instance;
+  public static Stamper stamper = LastModifiedStamper.instance;
   
   public static SimpleMode mode = new SimpleMode();
 
