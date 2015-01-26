@@ -5,27 +5,27 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.sugarj.cleardep.stamp.Stamp;
+import org.sugarj.cleardep.stamp.Stamper;
 import org.sugarj.common.FileCommands;
-import org.sugarj.common.cleardep.Stamp;
-import org.sugarj.common.cleardep.Stamper;
 import org.sugarj.common.path.Path;
 
 
-public class BibtexSourceStamper implements Stamper {
+public class BibtexAuxRequirementsStamper implements Stamper {
   
-  public static BibtexSourceStamper instance = new BibtexSourceStamper();
-  private BibtexSourceStamper() { }
+  public static BibtexAuxRequirementsStamper instance = new BibtexAuxRequirementsStamper();
+  private BibtexAuxRequirementsStamper() { }
   
   @Override
-  public BibtexSourceStamp stampOf(Path p) {
+  public BibtexAuxRequirementsStamp stampOf(Path p) {
     String content;
     try {
       content = FileCommands.readFileAsString(p);
     } catch (FileNotFoundException e) {
-      return new BibtexSourceStamp(null, null);
+      return new BibtexAuxRequirementsStamp(null, null);
     } catch (IOException e) {
       e.printStackTrace();
-      return new BibtexSourceStamp(null, null);
+      return new BibtexAuxRequirementsStamp(null, null);
     }
     
     String currentStyle = null;
@@ -52,11 +52,11 @@ public class BibtexSourceStamper implements Stamper {
       }
       
     
-    return new BibtexSourceStamp(bibdata, citations);
+    return new BibtexAuxRequirementsStamp(bibdata, citations);
   }
-
   
-  public static class BibtexSourceStamp implements Stamp {
+  
+  public static class BibtexAuxRequirementsStamp implements Stamp {
 
     private static final long serialVersionUID = -1055541424119046676L;
 
@@ -69,18 +69,18 @@ public class BibtexSourceStamper implements Stamper {
      */
     public final Set<String> citations;
     
-    public BibtexSourceStamp(Map<String, String> bibdatas, Set<String> citations) {
+    public BibtexAuxRequirementsStamp(Map<String, String> bibdatas, Set<String> citations) {
       this.bibdatas = bibdatas;
       this.citations = citations;
     }
 
     @Override
     public boolean equals(Stamp o) {
-      if (!(o instanceof BibtexSourceStamp))
+      if (!(o instanceof BibtexAuxRequirementsStamp))
         return false;
       
-      Map<String, String> obibdatas = ((BibtexSourceStamp) o).bibdatas;
-      Set<String> ocitations = ((BibtexSourceStamp) o).citations;
+      Map<String, String> obibdatas = ((BibtexAuxRequirementsStamp) o).bibdatas;
+      Set<String> ocitations = ((BibtexAuxRequirementsStamp) o).citations;
       boolean eqBibdatas = bibdatas == null && obibdatas == null || bibdatas != null && bibdatas.equals(obibdatas);
       boolean eqCitations = citations == null && ocitations == null || citations != null && citations.equals(ocitations);
       return eqBibdatas && eqCitations;
@@ -88,7 +88,7 @@ public class BibtexSourceStamper implements Stamper {
 
     @Override
     public Stamper getStamper() {
-      return BibtexSourceStamper.instance;
+      return BibtexAuxRequirementsStamper.instance;
     }
     
     @Override

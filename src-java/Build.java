@@ -1,23 +1,21 @@
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.sugarj.common.CommandExecution;
-import org.sugarj.common.FileCommands;
 import org.sugarj.common.CommandExecution.ExecutionError;
-import org.sugarj.common.cleardep.CompilationUnit;
-import org.sugarj.common.cleardep.CompilationUnit.State;
-import org.sugarj.common.cleardep.LastModifiedStamper;
-import org.sugarj.common.cleardep.SimpleCompilationUnit;
-import org.sugarj.common.cleardep.SimpleMode;
-import org.sugarj.common.cleardep.Stamp;
-import org.sugarj.common.cleardep.Stamper;
+import org.sugarj.common.FileCommands;
+import org.sugarj.cleardep.CompilationUnit;
+import org.sugarj.cleardep.CompilationUnit.State;
+import org.sugarj.cleardep.SimpleCompilationUnit;
+import org.sugarj.cleardep.SimpleMode;
+import org.sugarj.cleardep.stamp.LastModifiedStamper;
+import org.sugarj.cleardep.stamp.Stamp;
+import org.sugarj.cleardep.stamp.Stamper;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
-
 
 public class Build {
 
@@ -99,6 +97,7 @@ public class Build {
 	    buildBib(aux, bibresult);
 	  }
 	  
+	  
 	  result.addModuleDependency(bibresult);
 	  
 	  FileCommands.createDir(build);
@@ -121,7 +120,8 @@ public class Build {
   private static void buildBib(RelativePath aux, CompilationUnit result) throws IOException {
     log("bibtex", "Build bib for " + aux);
     
-    result.addSourceArtifact(aux, BibtexSourceStamper.instance.stampOf(aux));
+    BibtexAuxRequirementsStamper.BibtexAuxRequirementsStamp bibtexSourceStamp = BibtexAuxRequirementsStamper.instance.stampOf(aux);
+    result.addSourceArtifact(aux, bibtexSourceStamp);
     
     if (!FileCommands.exists(aux)) {
       log("bibtex", "No bibliography built: Could not find " + aux);
@@ -131,7 +131,7 @@ public class Build {
       return;
     }
     
-    List<String> bibnames = extractBibNames(aux);
+    Set<String> bibnames = bibtexSourceStamp.bibdatas.keySet();
     for (String bibname : bibnames) {
       RelativePath srcbib = rel(src, bibname + ".bib");
       RelativePath buildbib = rel(build, bibname + ".bib");
@@ -157,18 +157,6 @@ public class Build {
     logCompilationUnit(result);
   }
 	
-  private static List<String> extractBibNames(RelativePath aux) throws IOException {
-    String content = FileCommands.readFileAsString(aux);
-    List<String> bibnames = new ArrayList<String>();
-    for (String line : content.split("\n"))
-      if (line.startsWith("\\bibdata{")) {
-        int start = "\\bibdata{".length();
-        int end = line.indexOf('}');
-        bibnames.add(line.substring(start, end));
-      }
-    
-    return bibnames;
-  }
   private static void logCompilationUnit(CompilationUnit result) {
 //    System.out.println("Required modules: " + result.getModuleDependencies());
 //    System.out.println("Required modules (circular): " + result.getCircularModuleDependencies());
