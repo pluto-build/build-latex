@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.FileCommands;
+import org.sugarj.common.CommandExecution.ExecutionError;
 import org.sugarj.common.cleardep.CompilationUnit;
 import org.sugarj.common.cleardep.CompilationUnit.State;
 import org.sugarj.common.cleardep.LastModifiedStamper;
@@ -76,7 +77,7 @@ public class Build {
 	  RelativePath dep = FileCommands.replaceExtension(rel(build, tex.getRelativePath()), "dep");
 	  
 	  while (SimpleCompilationUnit.readConsistent(stamper, mode, null, dep) == null) {
-	    CompilationUnit result = SimpleCompilationUnit.create(stamper, mode, null, sourceMap(tex), dep);
+	    CompilationUnit result = SimpleCompilationUnit.create(stamper, mode, null, dep);
 	    buildTex(tex, result);
 	  }
 	}
@@ -88,31 +89,39 @@ public class Build {
 	private static void buildTex(RelativePath tex, CompilationUnit result) throws IOException {
 	  log("tex", "Build tex " + tex);
 	  
+	  result.addSourceArtifact(tex);
     RelativePath aux = FileCommands.replaceExtension(rel(build, tex.getRelativePath()), "aux");
     RelativePath bibdep = FileCommands.replaceExtension(rel(build, tex.getRelativePath()), "bibdep");
 	  
     CompilationUnit bibresult = SimpleCompilationUnit.readConsistent(stamper, mode, null, bibdep);
 	  if (bibresult == null) {
-	    bibresult = SimpleCompilationUnit.create(stamper, mode, null, sourceMap(aux), bibdep);
+	    bibresult = SimpleCompilationUnit.create(stamper, mode, null, bibdep);
 	    buildBib(aux, bibresult);
 	  }
 	  
 	  result.addModuleDependency(bibresult);
 	  
 	  FileCommands.createDir(build);
-	  runner.execute(src, "pdflatex", "-interaction=batchmode", "-output-directory=../"+FileCommands.fileName(build)+"/", FileCommands.dropDirectory(tex));
+	  try {
+	    runner.execute(src, "pdflatex", "-interaction=batchmode", "-output-directory=../"+FileCommands.fileName(build)+"/", FileCommands.dropDirectory(tex));
+	    result.setState(State.SUCCESS);
+	  } catch (ExecutionError e) {
+	    System.err.println(e.getMessage());
+      result.setState(State.FAILURE);
+	  }
 	  
 	  RelativePath pdf = FileCommands.replaceExtension(rel(build, tex.getRelativePath()), "pdf");
 	  result.addGeneratedFile(aux);
 	  result.addGeneratedFile(pdf);
 
-	  result.setState(State.SUCCESS);
 	  result.write();
 	  logCompilationUnit(result);
   }
 	
   private static void buildBib(RelativePath aux, CompilationUnit result) throws IOException {
     log("bibtex", "Build bib for " + aux);
+    
+    result.addSourceArtifact(aux, BibtexSourceStamper.instance.stampOf(aux));
     
     if (!FileCommands.exists(aux)) {
       log("bibtex", "No bibliography built: Could not find " + aux);
@@ -133,12 +142,17 @@ public class Build {
     }
     
     FileCommands.createDir(build);
-    runner.execute(build, "bibtex", FileCommands.fileName(aux));
+    try {
+      runner.execute(build, "bibtex", FileCommands.fileName(aux));
+      result.setState(State.SUCCESS);
+    } catch (ExecutionError e) {
+      System.err.println(e.getMessage());
+      result.setState(State.FAILURE);
+    }
     
     RelativePath bbl = FileCommands.replaceExtension(aux, "bbl");
     result.addGeneratedFile(bbl);
     
-    result.setState(State.SUCCESS);
     result.write();
     logCompilationUnit(result);
   }
