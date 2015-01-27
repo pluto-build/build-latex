@@ -3,6 +3,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import org.sugarj.cleardep.BuildUnit;
 import org.sugarj.cleardep.CompilationUnit;
 import org.sugarj.cleardep.CompilationUnit.State;
 import org.sugarj.cleardep.SimpleCompilationUnit;
@@ -74,18 +75,21 @@ public class Build {
   private static void buildTex(RelativePath tex, CompilationUnit result) throws IOException {
     log("tex", "Build tex " + tex);
 
-    result.addSourceArtifact(tex);
     RelativePath aux = FileCommands.replaceExtension(rel(build, tex.getRelativePath()), "aux");
-    RelativePath bibdep = FileCommands.replaceExtension(rel(build, tex.getRelativePath()), "bibdep");
+    result.addSourceArtifact(tex);
+    result.addSourceArtifact(aux, ContentStamper.instance.stampOf(aux));
 
+    RelativePath bibdep = FileCommands.replaceExtension(rel(build, tex.getRelativePath()), "bibdep");
     CompilationUnit bibresult = SimpleCompilationUnit.readConsistent(stamper, mode, null, bibdep);
     if (bibresult == null) {
       bibresult = SimpleCompilationUnit.create(stamper, mode, null, bibdep);
       buildBib(aux, bibresult);
     }
+    
+    BuildUnit<RelativePath> unit = null;
+    unit.build(aux);
 
     result.addModuleDependency(bibresult, bblStamper.stampOf(bibresult));
-    result.addSourceArtifact(aux, ContentStamper.instance.stampOf(aux));
     
     FileCommands.createDir(build);
     try {
