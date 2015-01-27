@@ -86,9 +86,6 @@ public class Build {
       buildBib(aux, bibresult);
     }
     
-    BuildUnit<RelativePath> unit = null;
-    unit.build(aux);
-
     result.addModuleDependency(bibresult, bblStamper.stampOf(bibresult));
     
     FileCommands.createDir(build);
