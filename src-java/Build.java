@@ -49,10 +49,6 @@ public class Build {
 
     if (args.length > 0 && "clean".equals(args[0]))
       clean();
-    // else if (args.length > 0 && "latex".equals(args[0]))
-    // buildTex(tex);
-    // else if (args.length > 0 && "bibtex".equals(args[0]))
-    // buildBib(tex);
     else
       build(tex);
   }
@@ -60,21 +56,6 @@ public class Build {
   private static void clean() throws IOException {
     log("Clean", "Cleaning files in " + build);
     FileCommands.delete(build);
-
-    for (RelativePath p : FileCommands.listFiles(src))
-      if (p.getRelativePath().equals("document.pdf"))
-        FileCommands.delete(p);
-      else {
-        String ext = FileCommands.getExtension(p);
-        switch (ext) {
-        case "aux":
-        case "out":
-        case "log":
-          FileCommands.delete(p);
-          break;
-        default:
-        }
-      }
   }
 
   private static void build(RelativePath tex) throws IOException {
