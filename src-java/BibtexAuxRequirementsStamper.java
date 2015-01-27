@@ -13,6 +13,8 @@ import org.sugarj.common.path.Path;
 
 public class BibtexAuxRequirementsStamper implements Stamper {
   
+  private static final long serialVersionUID = 5441596559010960001L;
+
   public static BibtexAuxRequirementsStamper instance = new BibtexAuxRequirementsStamper();
   private BibtexAuxRequirementsStamper() { }
   
@@ -75,15 +77,15 @@ public class BibtexAuxRequirementsStamper implements Stamper {
     }
 
     @Override
-    public boolean equals(Stamp o) {
-      if (!(o instanceof BibtexAuxRequirementsStamp))
-        return false;
-      
-      Map<String, String> obibdatas = ((BibtexAuxRequirementsStamp) o).bibdatas;
-      Set<String> ocitations = ((BibtexAuxRequirementsStamp) o).citations;
-      boolean eqBibdatas = bibdatas == null && obibdatas == null || bibdatas != null && bibdatas.equals(obibdatas);
-      boolean eqCitations = citations == null && ocitations == null || citations != null && citations.equals(ocitations);
-      return eqBibdatas && eqCitations;
+    public boolean equals(Object o) {
+      if (o instanceof BibtexAuxRequirementsStamp) {
+        Map<String, String> obibdatas = ((BibtexAuxRequirementsStamp) o).bibdatas;
+        Set<String> ocitations = ((BibtexAuxRequirementsStamp) o).citations;
+        boolean eqBibdatas = bibdatas == null && obibdatas == null || bibdatas != null && bibdatas.equals(obibdatas);
+        boolean eqCitations = citations == null && ocitations == null || citations != null && citations.equals(ocitations);
+        return eqBibdatas && eqCitations;
+      }
+      return false;
     }
 
     @Override
