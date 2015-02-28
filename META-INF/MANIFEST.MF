@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Build-latex
+Bundle-SymbolicName: org.sugarj.cleardep.buildlatex
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.sugarj.cleardep.buildlatex.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Import-Package: org.sugarj.cleardep,
+ org.sugarj.cleardep.build,
+ org.sugarj.cleardep.stamp,
+ org.sugarj.common,
+ org.sugarj.common.path
