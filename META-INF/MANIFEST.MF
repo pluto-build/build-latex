@@ -10,6 +10,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Import-Package: org.sugarj.cleardep,
  org.sugarj.cleardep.build,
+ org.sugarj.cleardep.dependency,
  org.sugarj.cleardep.stamp,
  org.sugarj.common,
  org.sugarj.common.path

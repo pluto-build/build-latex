@@ -2,9 +2,9 @@ package org.sugarj.cleardep.buildlatex;
 
 import java.io.Serializable;
 
-import org.sugarj.cleardep.CompilationUnit;
+import org.sugarj.cleardep.BuildUnit;
 import org.sugarj.cleardep.build.BuildManager;
-import org.sugarj.cleardep.build.BuildRequirement;
+import org.sugarj.cleardep.build.BuildRequest;
 import org.sugarj.cleardep.build.Builder;
 import org.sugarj.cleardep.build.BuilderFactory;
 import org.sugarj.cleardep.stamp.ContentStamper;
@@ -16,15 +16,15 @@ import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 
-public class LatexBuilder extends Builder<LatexBuilder.Input, CompilationUnit> {
+public class LatexBuilder extends Builder<LatexBuilder.Input, BuildUnit> {
 
   public static class Input implements Serializable {
     private static final long serialVersionUID = -6065839202426934802L;
     public final RelativePath texPath;
     public final Path srcDir;
     public final Path targetDir;
-    public final BuildRequirement<?, ?, ?, ?>[] injectedRequirements;
-    public Input(RelativePath auxPath, Path srcDir, Path targetDir, BuildRequirement<?, ?, ?, ?>[] injectedRequirements) {
+    public final BuildRequest<?, ?, ?, ?>[] injectedRequirements;
+    public Input(RelativePath auxPath, Path srcDir, Path targetDir, BuildRequest<?, ?, ?, ?>[] injectedRequirements) {
       this.texPath = auxPath;
       this.srcDir = srcDir;
       this.targetDir = targetDir;
@@ -32,7 +32,7 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, CompilationUnit> {
     }
   }
 
-  private LatexBuilder(Input input, BuilderFactory<Input, CompilationUnit, ? extends Builder<Input, CompilationUnit>> sourceFactory, BuildManager manager) {
+  private LatexBuilder(Input input, BuilderFactory<Input, BuildUnit, ? extends Builder<Input, BuildUnit>> sourceFactory, BuildManager manager) {
     super(input, sourceFactory, manager);
   }
 
@@ -47,8 +47,8 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, CompilationUnit> {
   }
 
   @Override
-  protected Class<CompilationUnit> resultClass() {
-    return CompilationUnit.class;
+  protected Class<BuildUnit> resultClass() {
+    return BuildUnit.class;
   }
 
   @Override
@@ -57,15 +57,15 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, CompilationUnit> {
   }
 
   @Override
-  protected void build(CompilationUnit result) throws Throwable {
+  protected void build(BuildUnit result) throws Throwable {
     require(input.injectedRequirements);
     
     Path srcDir = input.srcDir != null ? input.srcDir : new AbsolutePath(".");
     Path targetDir = input.targetDir != null ? input.targetDir : new AbsolutePath(".");
     
     RelativePath auxPath = FileCommands.replaceExtension(new RelativePath(targetDir, input.texPath.getRelativePath()), "aux");
-    result.addSourceArtifact(input.texPath);
-    result.addSourceArtifact(auxPath, ContentStamper.instance.stampOf(auxPath));
+    result.requires(input.texPath);
+    result.requires(auxPath, ContentStamper.instance.stampOf(auxPath));
 
     if (FileCommands.exists(auxPath))
       require(BibtexBuilder.factory, new BibtexBuilder.Input(auxPath, srcDir, targetDir, null));
@@ -74,8 +74,8 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, CompilationUnit> {
     new CommandExecution(false).execute(srcDir, "pdflatex", "-interaction=batchmode", "-output-directory=../" + FileCommands.fileName(targetDir) + "/", FileCommands.dropDirectory(input.texPath));
 
     RelativePath pdfPath = FileCommands.replaceExtension(new RelativePath(targetDir, input.texPath.getRelativePath()), "pdf");
-    result.addGeneratedFile(auxPath);
-    result.addGeneratedFile(pdfPath);
+    result.generates(auxPath);
+    result.generates(pdfPath);
   }
   
 }
