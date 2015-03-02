@@ -3,10 +3,10 @@ package org.sugarj.cleardep.buildlatex;
 import java.io.Serializable;
 import java.util.Set;
 
-import org.sugarj.cleardep.None;
 import org.sugarj.cleardep.build.BuildRequest;
 import org.sugarj.cleardep.build.Builder;
 import org.sugarj.cleardep.build.BuilderFactory;
+import org.sugarj.cleardep.output.None;
 import org.sugarj.cleardep.stamp.LastModifiedStamper;
 import org.sugarj.cleardep.stamp.Stamper;
 import org.sugarj.common.CommandExecution;

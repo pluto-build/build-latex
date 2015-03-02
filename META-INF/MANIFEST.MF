@@ -11,6 +11,7 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.sugarj.cleardep,
  org.sugarj.cleardep.build,
  org.sugarj.cleardep.dependency,
+ org.sugarj.cleardep.output,
  org.sugarj.cleardep.stamp,
  org.sugarj.common,
  org.sugarj.common.path
