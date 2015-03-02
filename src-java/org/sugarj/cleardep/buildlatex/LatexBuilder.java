@@ -69,6 +69,9 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, BuildUnit> {
 
     if (FileCommands.exists(auxPath))
       require(BibtexBuilder.factory, new BibtexBuilder.Input(auxPath, srcDir, targetDir, null));
+
+    RelativePath bbl = FileCommands.replaceExtension(auxPath, "bbl");
+    result.requires(bbl);
     
     FileCommands.createDir(targetDir);
     new CommandExecution(false).execute(srcDir, "pdflatex", "-interaction=batchmode", "-output-directory=../" + FileCommands.fileName(targetDir) + "/", FileCommands.dropDirectory(input.texPath));
