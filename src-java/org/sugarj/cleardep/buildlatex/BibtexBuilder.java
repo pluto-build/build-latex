@@ -65,7 +65,7 @@ public class BibtexBuilder extends Builder<BibtexBuilder.Input, None> {
     require(input.injectedRequirements);
     
     ValueStamp<Pair<Map<String,String>, Set<String>>> bibtexSourceStamp = BibtexAuxRequirementsStamper.instance.stampOf(input.auxPath);
-    requires(input.auxPath, BibtexAuxRequirementsStamper.instance);
+    requires(input.auxPath, bibtexSourceStamp);
 
     if (!FileCommands.exists(input.auxPath))
       throw new IllegalArgumentException("No bibliography built: Could not find " + input.auxPath);

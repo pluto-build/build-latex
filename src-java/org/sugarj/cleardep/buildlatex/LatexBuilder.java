@@ -66,7 +66,7 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
     
     RelativePath auxPath = FileCommands.replaceExtension(new RelativePath(targetDir, input.texPath.getRelativePath()), "aux");
     requires(input.texPath);
-    requires(auxPath, ContentStamper.instance.stampOf(auxPath));
+    requires(auxPath, ContentStamper.instance);
 
     if (FileCommands.exists(auxPath))
       require(BibtexBuilder.factory, new BibtexBuilder.Input(auxPath, srcDir, targetDir, null));
