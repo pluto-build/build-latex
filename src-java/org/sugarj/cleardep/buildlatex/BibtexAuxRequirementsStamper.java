@@ -6,10 +6,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.sugarj.cleardep.stamp.Stamp;
 import org.sugarj.cleardep.stamp.Stamper;
+import org.sugarj.cleardep.stamp.ValueStamp;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.Path;
+import org.sugarj.common.util.Pair;
 
 
 public class BibtexAuxRequirementsStamper implements Stamper {
@@ -20,15 +21,15 @@ public class BibtexAuxRequirementsStamper implements Stamper {
   private BibtexAuxRequirementsStamper() { }
   
   @Override
-  public BibtexAuxRequirementsStamp stampOf(Path p) {
+  public ValueStamp<Pair<Map<String, String>, Set<String>>> stampOf(Path p) {
     String content;
     try {
       content = FileCommands.readFileAsString(p);
     } catch (FileNotFoundException e) {
-      return new BibtexAuxRequirementsStamp(null, null);
+      return new ValueStamp<>(this, null);
     } catch (IOException e) {
       e.printStackTrace();
-      return new BibtexAuxRequirementsStamp(null, null);
+      return new ValueStamp<>(this, null);
     }
     
     String currentStyle = null;
@@ -53,50 +54,7 @@ public class BibtexAuxRequirementsStamper implements Stamper {
         for (String citation : cits.split(","))
           citations.add(citation);
       }
-      
     
-    return new BibtexAuxRequirementsStamp(bibdata, citations);
-  }
-  
-  
-  public static class BibtexAuxRequirementsStamp implements Stamp {
-
-    private static final long serialVersionUID = -1055541424119046676L;
-
-    /**
-     * Maps name of bibliography to citation style.
-     */
-    public final Map<String, String> bibdatas;
-    /**
-     * Set of cited entries.
-     */
-    public final Set<String> citations;
-    
-    public BibtexAuxRequirementsStamp(Map<String, String> bibdatas, Set<String> citations) {
-      this.bibdatas = bibdatas;
-      this.citations = citations;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (o instanceof BibtexAuxRequirementsStamp) {
-        Map<String, String> obibdatas = ((BibtexAuxRequirementsStamp) o).bibdatas;
-        Set<String> ocitations = ((BibtexAuxRequirementsStamp) o).citations;
-        boolean eqBibdatas = bibdatas == null && obibdatas == null || bibdatas != null && bibdatas.equals(obibdatas);
-        boolean eqCitations = citations == null && ocitations == null || citations != null && citations.equals(ocitations);
-        return eqBibdatas && eqCitations;
-      }
-      return false;
-    }
-
-    @Override
-    public Stamper getStamper() {
-      return BibtexAuxRequirementsStamper.instance;
-    }
-    
-    @Override
-    public String toString() {
-      return "BibtexSource(" + bibdatas + ", " + citations + ")";
-    }
+    return new ValueStamp<>(this, Pair.create(bibdata, citations));
   }
 }

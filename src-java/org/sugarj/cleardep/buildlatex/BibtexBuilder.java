@@ -1,6 +1,7 @@
 package org.sugarj.cleardep.buildlatex;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Set;
 
 import org.sugarj.cleardep.build.BuildRequest;
@@ -9,11 +10,13 @@ import org.sugarj.cleardep.build.BuilderFactory;
 import org.sugarj.cleardep.output.None;
 import org.sugarj.cleardep.stamp.LastModifiedStamper;
 import org.sugarj.cleardep.stamp.Stamper;
+import org.sugarj.cleardep.stamp.ValueStamp;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
+import org.sugarj.common.util.Pair;
 
 public class BibtexBuilder extends Builder<BibtexBuilder.Input, None> {
 
@@ -61,13 +64,13 @@ public class BibtexBuilder extends Builder<BibtexBuilder.Input, None> {
   protected None build() throws Throwable {
     require(input.injectedRequirements);
     
-    BibtexAuxRequirementsStamper.BibtexAuxRequirementsStamp bibtexSourceStamp = BibtexAuxRequirementsStamper.instance.stampOf(input.auxPath);
+    ValueStamp<Pair<Map<String,String>, Set<String>>> bibtexSourceStamp = BibtexAuxRequirementsStamper.instance.stampOf(input.auxPath);
     requires(input.auxPath, BibtexAuxRequirementsStamper.instance);
 
     if (!FileCommands.exists(input.auxPath))
       throw new IllegalArgumentException("No bibliography built: Could not find " + input.auxPath);
     
-    Set<String> bibnames = bibtexSourceStamp.bibdatas.keySet();
+    Set<String> bibnames = bibtexSourceStamp.val.a.keySet();
     
     Path srcDir = input.srcDir != null ? input.srcDir : new AbsolutePath(".");
     Path targetDir = input.targetDir != null ? input.targetDir : new AbsolutePath(".");
