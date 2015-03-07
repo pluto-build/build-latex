@@ -26,12 +26,12 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
 
   public static class Input implements Serializable {
     private static final long serialVersionUID = -6065839202426934802L;
-    public final RelativePath texPath;
+    public final Path texPath;
     public final Path srcDir;
     public final Path targetDir;
     public final BuildRequest<?, ?, ?, ?>[] injectedRequirements;
-    public Input(RelativePath auxPath, Path srcDir, Path targetDir, BuildRequest<?, ?, ?, ?>[] injectedRequirements) {
-      this.texPath = auxPath;
+    public Input(Path texPath, Path srcDir, Path targetDir, BuildRequest<?, ?, ?, ?>[] injectedRequirements) {
+      this.texPath = texPath;
       this.srcDir = srcDir;
       this.targetDir = targetDir;
       this.injectedRequirements = injectedRequirements;
@@ -49,7 +49,9 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
 
   @Override
   protected Path persistentPath() {
-    return input.texPath.replaceExtension("bibdep");
+    if (input.targetDir != null)
+      return new RelativePath(input.targetDir, "latex.dep");
+    return new AbsolutePath("./latex.dep");
   }
 
   @Override
@@ -64,12 +66,16 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
     Path srcDir = input.srcDir != null ? input.srcDir : new AbsolutePath(".");
     Path targetDir = input.targetDir != null ? input.targetDir : new AbsolutePath(".");
     
-    RelativePath auxPath = FileCommands.replaceExtension(new RelativePath(targetDir, input.texPath.getRelativePath()), "aux");
+    RelativePath texPath = FileCommands.getRelativePath(srcDir, input.texPath);
+    if (texPath == null)
+      throw new IllegalArgumentException("Builder requires tex file to be within the source directory.");
+    
+    RelativePath auxPath = FileCommands.replaceExtension(new RelativePath(targetDir, texPath.getRelativePath()), "aux");
     requires(input.texPath);
     requires(auxPath, ContentStamper.instance);
 
     if (FileCommands.exists(auxPath))
-      require(BibtexBuilder.factory, new BibtexBuilder.Input(auxPath, srcDir, targetDir, null));
+      require(BibtexBuilder.factory, new BibtexBuilder.Input(input.texPath, auxPath, srcDir, targetDir, null));
 
     RelativePath bbl = FileCommands.replaceExtension(auxPath, "bbl");
     requires(bbl);
@@ -77,7 +83,7 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
     FileCommands.createDir(targetDir);
     new CommandExecution(false).execute(srcDir, "pdflatex", "-interaction=batchmode", "-output-directory=../" + FileCommands.fileName(targetDir) + "/", FileCommands.dropDirectory(input.texPath));
 
-    RelativePath pdfPath = FileCommands.replaceExtension(new RelativePath(targetDir, input.texPath.getRelativePath()), "pdf");
+    RelativePath pdfPath = FileCommands.replaceExtension(new RelativePath(targetDir, texPath.getRelativePath()), "pdf");
     generates(auxPath);
     generates(pdfPath);
     

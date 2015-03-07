@@ -29,11 +29,13 @@ public class BibtexBuilder extends Builder<BibtexBuilder.Input, None> {
   
   public static class Input implements Serializable {
     private static final long serialVersionUID = -6065839202426934802L;
-    public final RelativePath auxPath;
+    public final Path texPath;
+    public final Path auxPath;
     public final Path srcDir;
     public final Path targetDir;
     public final BuildRequest<?, ?, ?, ?>[] injectedRequirements;
-    public Input(RelativePath auxPath, Path srcDir, Path targetDir, BuildRequest<?, ?, ?, ?>[] injectedRequirements) {
+    public Input(Path texPath, Path auxPath, Path srcDir, Path targetDir, BuildRequest<?, ?, ?, ?>[] injectedRequirements) {
+      this.texPath = texPath;
       this.auxPath = auxPath;
       this.srcDir = srcDir;
       this.targetDir = targetDir;
@@ -64,6 +66,8 @@ public class BibtexBuilder extends Builder<BibtexBuilder.Input, None> {
   protected None build() throws Throwable {
     require(input.injectedRequirements);
     
+    require(LatexBuilder.factory, new LatexBuilder.Input(input.texPath, input.srcDir, input.targetDir, null));
+    
     ValueStamp<Pair<Map<String,String>, Set<String>>> bibtexSourceStamp = BibtexAuxRequirementsStamper.instance.stampOf(input.auxPath);
     requires(input.auxPath, bibtexSourceStamp);
 
@@ -88,7 +92,7 @@ public class BibtexBuilder extends Builder<BibtexBuilder.Input, None> {
 
     new CommandExecution(false).execute(targetDir, "bibtex", FileCommands.fileName(input.auxPath));
 
-    RelativePath bbl = FileCommands.replaceExtension(input.auxPath, "bbl");
+    Path bbl = input.auxPath.replaceExtension("bbl");
     generates(bbl);
     
     return None.val;
