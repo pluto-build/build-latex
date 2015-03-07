@@ -49,7 +49,7 @@ public class BibtexBuilder extends Builder<BibtexBuilder.Input, None> {
 
   @Override
   protected String taskDescription() {
-    return "Build bibliography for " + FileCommands.fileName(input.auxPath);
+    return "Build bibliography for " + FileCommands.dropDirectory(input.auxPath);
   }
 
   @Override

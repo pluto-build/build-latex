@@ -1,6 +1,8 @@
 package org.sugarj.cleardep.buildlatex;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.sugarj.cleardep.build.BuildRequest;
 import org.sugarj.cleardep.build.Builder;
@@ -44,7 +46,7 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
 
   @Override
   protected String taskDescription() {
-    return "Build bibliography for " + FileCommands.fileName(input.texPath);
+    return "Build PDF from " + FileCommands.dropDirectory(input.texPath);
   }
 
   @Override
@@ -81,13 +83,38 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
     requires(bbl);
     
     FileCommands.createDir(targetDir);
-    new CommandExecution(false).execute(srcDir, "pdflatex", "-interaction=batchmode", "-output-directory=../" + FileCommands.fileName(targetDir) + "/", FileCommands.dropDirectory(input.texPath));
+    String[][] msgs = new CommandExecution(true).execute(srcDir, 
+        "pdflatex", 
+        "-interaction=batchmode", 
+        "-output-directory=" + targetDir.getAbsolutePath(),
+        "-kpathsea-debug=4",
+        FileCommands.dropDirectory(input.texPath));
 
-    RelativePath pdfPath = FileCommands.replaceExtension(new RelativePath(targetDir, texPath.getRelativePath()), "pdf");
+    List<Path> requiredFiles = extractRequiredFiles(msgs[1], srcDir);
+    for (Path p : requiredFiles)
+      requires(p);
+    
+    
+    RelativePath pdfPath = auxPath.replaceExtension("pdf");
     generates(auxPath);
     generates(pdfPath);
     
     return None.val;
+  }
+
+  private List<Path> extractRequiredFiles(String[] lines, Path baseDir) {
+    List<Path> paths = new ArrayList<>();
+    for (String line : lines)
+      if (line.startsWith("kdebug:fopen(")) {
+        int start = "kdebug:fopen(".length();
+        int end = line.indexOf(',');
+        String file = line.substring(start, end);
+        if (AbsolutePath.acceptable(file) && !file.startsWith("."))
+          paths.add(new AbsolutePath(file));
+        else
+          paths.add(new RelativePath(baseDir, file));
+      }
+    return paths;
   }
   
 }
