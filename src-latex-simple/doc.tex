@@ -1,0 +1,116 @@
+\documentclass[preprint,10pt]{sigplanconf}
+% The following \documentclass options may be useful:
+%
+% 10pt          To set in 10-point type instead of 9-point.
+% 11pt          To set in 11-point type instead of 9-point.
+% authoryear    To obtain author/year citation style instead of numeric.
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+% \usepackage{amsthm}
+\usepackage{array}
+% \usepackage{cite}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage[nooneline,tight]{subfigure}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage{multirow}
+\usepackage{flushend}
+\usepackage{stmaryrd}
+\usepackage[T1]{fontenc}
+\usepackage{xspace}
+\usepackage{xparse}
+\usepackage{subdepth}
+\usepackage{wrapfig}
+\usepackage[inference]{semantic}
+\usepackage{scalerel}
+\usepackage{oz}
+
+\usetikzlibrary{positioning,chains,shapes.arrows,shapes.geometric,fit,calc,arrows,decorations.pathmorphing}
+
+\newif\iftechreport
+%\techreporttrue % uncomment to activate tech-report setup
+\techreportfalse % uncomment to deactivate tech-report setup
+
+\newcommand{\proofsketch}[1]{{\def\proofname{Proof sketch}\proof{#1}}}
+
+% this are the defaults from article.cls
+% \renewcommand\floatpagefraction{.9}
+% \renewcommand{\topfraction}{.9}
+% \renewcommand{\bottomfraction}{.1}
+% \renewcommand\textfraction{.1}  
+
+% \addtolength{\abovecaptionskip}{-0.4cm}
+% \newcommand{\captionskip}{1.5ex}
+% \addtolength{\belowcaptionskip}{-\captionskip}
+
+\hyphenation{meta-lan-guage}
+\hyphenation{meta-lan-guages}
+\hyphenation{SugarJ}
+\hyphenation{JastAddJ}
+\hyphenation{name-space}
+
+\begin{document}
+
+\title{A Sound and Optimal Incremental Build System}
+%\subtitle{Consistent, Incremental, Self-Applicable Building}
+% alternative titles: 
+%
+% A Modular Build System with Customizable File Stamps
+%
+% A Modular Build System with Semantic File Stamps
+%
+
+\authorinfo{%
+  Sebastian Erdweg \and
+  Moritz Lichter \and
+  Manuel Weiel %
+}
+{TU Darmstadt, Germany}
+
+\maketitle
+
+\newcommand{\projectname}{ClearDep\xspace}
+
+\begin{abstract}
+  Build systems are used in all but the smallest software projects to invoke the
+  right build tools on the right files in the right order.  A build system must
+  be sound (after a build, generated files consistently reflect the latest
+  source files) and efficient (recheck and rebuild as few build units as
+  possible). Contemporary build systems provide limited efficiency because they
+  lack support for expressing fine-grained file dependencies.
+
+  We present a modular build system called \projectname that supports the
+  definition of reusable, parameterized, interconnected builders. When run, a
+  builder notifies the build system about required and produced files as well as
+  about other builders whose results are needed. To support fine-grained file
+  dependencies, we generalize the traditional notion of time stamps to allow
+  builders to declare their actual requirements on a file's content.
+  \projectname collects the requirements and products of a builder with their
+  stamps in a build summary. This enables \projectname to provide provably
+  sound and optimal incremental rebuilding, even after changing a builder
+  definition itself. We have developed \projectname as a Java API and used it to
+  implement numerous builders. We describe our experience with migrating a
+  larger ANT build script to \projectname and compare the respective
+  build times.
+\end{abstract}
+
+\section{Introduction}
+\input{intro.tex}
+
+
+\bibliographystyle{abbrv}
+\bibliography{bib}
+
+
+\end{document}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
