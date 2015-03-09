@@ -78,10 +78,13 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
     if (texPath == null)
       throw new IllegalArgumentException("Builder requires tex file to be within the source directory.");
     
+    require(LatexBuilder.factory, input);
+    
     RelativePath auxPath = FileCommands.replaceExtension(new RelativePath(targetDir, texPath.getRelativePath()), "aux");
     if (FileCommands.exists(auxPath)) {
       require(BibtexBuilder.factory, new BibtexBuilder.Input(input.texPath, auxPath, srcDir, targetDir, input.binaryLocation));
     }
+    
 
     FileCommands.createDir(targetDir);
     String program = "pdflatex";
