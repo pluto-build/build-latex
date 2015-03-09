@@ -2,9 +2,10 @@ package org.sugarj.cleardep.buildlatex;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import org.sugarj.cleardep.build.BuildRequest;
 import org.sugarj.cleardep.build.Builder;
 import org.sugarj.cleardep.build.BuilderFactory;
 import org.sugarj.cleardep.build.CycleSupport;
@@ -17,6 +18,7 @@ import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
+import org.sugarj.common.util.Pair;
 
 public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
 
@@ -81,7 +83,7 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
     requires(auxPath, ContentStamper.instance);
 
     if (FileCommands.exists(auxPath)) {
-      require(BibtexBuilder.factory, new BibtexBuilder.Input(input.texPath, auxPath, srcDir, targetDir, null));
+      require(BibtexBuilder.factory, new BibtexBuilder.Input(input.texPath, auxPath, srcDir, targetDir, input.binaryLocation));
     }
 
     RelativePath bbl = FileCommands.replaceExtension(auxPath, "bbl");
@@ -99,32 +101,49 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
         "-kpathsea-debug=4",
         FileCommands.dropDirectory(input.texPath));
 
-    List<Path> requiredFiles = extractRequiredFiles(msgs[1], srcDir);
-    for (Path p : requiredFiles)
+    Pair<List<Path>, List<Path>> readWriteFiles = extractAccessedFiles(msgs[1]);
+    for (Path p : readWriteFiles.a)
       requires(p);
-    
-    require(BibtexBuilder.factory, new BibtexBuilder.Input(input.texPath, auxPath, srcDir, targetDir, input.binaryLocation));    
-    
-    RelativePath pdfPath = auxPath.replaceExtension("pdf");
-    generates(auxPath);
-    generates(pdfPath);
+    for (Path p : readWriteFiles.b)
+      if (!FileCommands.getExtension(p).equals("log"))
+        generates(p);
     
     return None.val;
   }
 
-  private List<Path> extractRequiredFiles(String[] lines, Path baseDir) {
-    List<Path> paths = new ArrayList<>();
+  private Pair<List<Path>, List<Path>> extractAccessedFiles(String[] lines) {
+    Path srcDir = input.srcDir != null ? input.srcDir : new AbsolutePath(".");
+    Path targetDir = input.targetDir != null ? input.targetDir : new AbsolutePath(".");
+    
+    List<Path> readPathList = new ArrayList<>();
+    Set<Path> readPaths = new HashSet<>();
+    List<Path> writePathList = new ArrayList<>();
+    Set<Path> writePaths = new HashSet<>();
     for (String line : lines)
       if (line.startsWith("kdebug:fopen(")) {
         int start = "kdebug:fopen(".length();
         int end = line.indexOf(',');
         String file = line.substring(start, end);
-        if (AbsolutePath.acceptable(file) && !file.startsWith("."))
-          paths.add(new AbsolutePath(file));
-        else
-          paths.add(new RelativePath(baseDir, file));
+        String mode = line.substring(end + 2, end + 3);
+        RelativePath rel;
+        if (AbsolutePath.acceptable(file) && !file.startsWith(".")) {
+          Path p = new AbsolutePath(file);
+          rel = FileCommands.getRelativePath(srcDir, p);
+          if (rel == null)
+            rel = FileCommands.getRelativePath(targetDir, p);
+        }
+        else {
+          if (file.startsWith("./"))
+            file = file.substring(2);
+          rel = new RelativePath(srcDir, file);
+        }
+        
+        if (FileCommands.exists(rel) && "r".equals(mode) && readPaths.add(rel))
+          readPathList.add(rel);
+        else if ("w".equals(mode) && writePaths.add(rel))
+          writePathList.add(rel);
       }
-    return paths;
+    return Pair.create(readPathList, writePathList);
   }
   
 }
