@@ -7,6 +7,7 @@ import java.util.List;
 import org.sugarj.cleardep.build.BuildRequest;
 import org.sugarj.cleardep.build.Builder;
 import org.sugarj.cleardep.build.BuilderFactory;
+import org.sugarj.cleardep.build.CycleSupport;
 import org.sugarj.cleardep.output.None;
 import org.sugarj.cleardep.stamp.ContentStamper;
 import org.sugarj.cleardep.stamp.LastModifiedStamper;
@@ -31,17 +32,22 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
     public final Path texPath;
     public final Path srcDir;
     public final Path targetDir;
-    public final BuildRequest<?, ?, ?, ?>[] injectedRequirements;
-    public Input(Path texPath, Path srcDir, Path targetDir, BuildRequest<?, ?, ?, ?>[] injectedRequirements) {
+    public final AbsolutePath binaryLocation;
+    public Input(Path texPath, Path srcDir, Path targetDir, AbsolutePath binaryLocation) {
       this.texPath = texPath;
       this.srcDir = srcDir;
       this.targetDir = targetDir;
-      this.injectedRequirements = injectedRequirements;
+      this.binaryLocation = binaryLocation;
     }
   }
 
   private LatexBuilder(Input input) {
     super(input);
+  }
+  
+  @Override
+  protected CycleSupport getCycleSupport() {
+    return new LatexBibtexCycleSupport();
   }
 
   @Override
@@ -63,8 +69,6 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
 
   @Override
   protected None build() throws Throwable {
-    require(input.injectedRequirements);
-    
     Path srcDir = input.srcDir != null ? input.srcDir : new AbsolutePath(".");
     Path targetDir = input.targetDir != null ? input.targetDir : new AbsolutePath(".");
     
@@ -76,15 +80,20 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
     requires(input.texPath);
     requires(auxPath, ContentStamper.instance);
 
-    if (FileCommands.exists(auxPath))
+    if (FileCommands.exists(auxPath)) {
       require(BibtexBuilder.factory, new BibtexBuilder.Input(input.texPath, auxPath, srcDir, targetDir, null));
+    }
 
     RelativePath bbl = FileCommands.replaceExtension(auxPath, "bbl");
     requires(bbl);
     
     FileCommands.createDir(targetDir);
+    String program = "pdflatex";
+    if (input.binaryLocation != null) {
+      program = input.binaryLocation.getAbsolutePath() + "/" + program;
+    }
     String[][] msgs = new CommandExecution(true).execute(srcDir, 
-        "pdflatex", 
+        program, 
         "-interaction=batchmode", 
         "-output-directory=" + targetDir.getAbsolutePath(),
         "-kpathsea-debug=4",
@@ -94,6 +103,7 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
     for (Path p : requiredFiles)
       requires(p);
     
+    require(BibtexBuilder.factory, new BibtexBuilder.Input(input.texPath, auxPath, srcDir, targetDir, input.binaryLocation));    
     
     RelativePath pdfPath = auxPath.replaceExtension("pdf");
     generates(auxPath);

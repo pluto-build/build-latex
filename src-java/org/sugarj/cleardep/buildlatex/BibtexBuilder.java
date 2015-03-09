@@ -7,6 +7,7 @@ import java.util.Set;
 import org.sugarj.cleardep.build.BuildRequest;
 import org.sugarj.cleardep.build.Builder;
 import org.sugarj.cleardep.build.BuilderFactory;
+import org.sugarj.cleardep.build.CycleSupport;
 import org.sugarj.cleardep.output.None;
 import org.sugarj.cleardep.stamp.LastModifiedStamper;
 import org.sugarj.cleardep.stamp.Stamper;
@@ -33,18 +34,24 @@ public class BibtexBuilder extends Builder<BibtexBuilder.Input, None> {
     public final Path auxPath;
     public final Path srcDir;
     public final Path targetDir;
-    public final BuildRequest<?, ?, ?, ?>[] injectedRequirements;
-    public Input(Path texPath, Path auxPath, Path srcDir, Path targetDir, BuildRequest<?, ?, ?, ?>[] injectedRequirements) {
+    public final AbsolutePath binaryLocation;
+    
+    public Input(Path texPath, Path auxPath, Path srcDir, Path targetDir,AbsolutePath binaryPath) {
       this.texPath = texPath;
       this.auxPath = auxPath;
       this.srcDir = srcDir;
       this.targetDir = targetDir;
-      this.injectedRequirements = injectedRequirements;
+      this.binaryLocation = binaryPath;
     }
   }
 
   private BibtexBuilder(Input input) {
     super(input);
+  }
+  
+  @Override
+  protected CycleSupport getCycleSupport() {
+    return new LatexBibtexCycleSupport();
   }
 
   @Override
@@ -64,9 +71,8 @@ public class BibtexBuilder extends Builder<BibtexBuilder.Input, None> {
 
   @Override
   protected None build() throws Throwable {
-    require(input.injectedRequirements);
     
-    require(LatexBuilder.factory, new LatexBuilder.Input(input.texPath, input.srcDir, input.targetDir, null));
+    require(LatexBuilder.factory, new LatexBuilder.Input(input.texPath, input.srcDir, input.targetDir, input.binaryLocation));
     
     ValueStamp<Pair<Map<String,String>, Set<String>>> bibtexSourceStamp = BibtexAuxRequirementsStamper.instance.stampOf(input.auxPath);
     requires(input.auxPath, bibtexSourceStamp);
@@ -90,7 +96,11 @@ public class BibtexBuilder extends Builder<BibtexBuilder.Input, None> {
         generates(buildbib);
       }
 
-    new CommandExecution(false).execute(targetDir, "bibtex", FileCommands.fileName(input.auxPath));
+    String program = "bibtex";
+    if (input.binaryLocation != null) {
+      program = input.binaryLocation.getAbsolutePath() + "/" + program;
+    }
+    new CommandExecution(false).execute(targetDir, program, FileCommands.fileName(input.auxPath));
 
     Path bbl = input.auxPath.replaceExtension("bbl");
     generates(bbl);
