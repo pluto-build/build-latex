@@ -79,16 +79,10 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
       throw new IllegalArgumentException("Builder requires tex file to be within the source directory.");
     
     RelativePath auxPath = FileCommands.replaceExtension(new RelativePath(targetDir, texPath.getRelativePath()), "aux");
-    requires(input.texPath);
-    requires(auxPath, ContentStamper.instance);
-
     if (FileCommands.exists(auxPath)) {
       require(BibtexBuilder.factory, new BibtexBuilder.Input(input.texPath, auxPath, srcDir, targetDir, input.binaryLocation));
     }
 
-    RelativePath bbl = FileCommands.replaceExtension(auxPath, "bbl");
-    requires(bbl);
-    
     FileCommands.createDir(targetDir);
     String program = "pdflatex";
     if (input.binaryLocation != null) {
@@ -102,11 +96,11 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
         FileCommands.dropDirectory(input.texPath));
 
     Pair<List<Path>, List<Path>> readWriteFiles = extractAccessedFiles(msgs[1]);
-    for (Path p : readWriteFiles.a)
-      requires(p);
     for (Path p : readWriteFiles.b)
       if (!FileCommands.getExtension(p).equals("log"))
         generates(p);
+    for (Path p : readWriteFiles.a)
+      requires(p);
     
     return None.val;
   }
