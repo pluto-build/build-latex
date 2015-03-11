@@ -81,7 +81,7 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
     requires(auxPath, ContentStamper.instance);
 
     if (FileCommands.exists(auxPath)) {
-      require(BibtexBuilder.factory, new BibtexBuilder.Input(input.texPath, auxPath, srcDir, targetDir, null));
+      require(BibtexBuilder.factory, new BibtexBuilder.Input(input.texPath, auxPath, srcDir, targetDir, this.input.binaryLocation));
     }
 
     RelativePath bbl = FileCommands.replaceExtension(auxPath, "bbl");
