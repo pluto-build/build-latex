@@ -18,14 +18,14 @@ public class Main {
     
    
     
-    Path srcDir = new RelativePath(root, "src-latex");
-    Path targetDir = new RelativePath(root, "bin-latex");
-    Path texPath = new RelativePath(srcDir, "document.tex");
+    Path srcDir = new RelativePath(root, "src-latex-simple");
+    Path targetDir = new RelativePath(root, "bin-latex-simple");
+    Path texPath = new RelativePath(srcDir, "doc.tex");
     
     // Rebuilding currently not supported because of missing cycle detecting in rebuild algo
-    FileCommands.delete(targetDir);
+    FileCommands.delete(LatexBuilder.factory.makeBuilder(new LatexBuilder.Input(texPath, srcDir, targetDir, null)).persistentPath());
     
-    BuildManager.build(new BuildRequest<>(LatexBuilder.factory, new LatexBuilder.Input(texPath, srcDir, targetDir, new AbsolutePath("/opt/local/bin/"))));
+    BuildManager.build(new BuildRequest<>(LatexBuilder.factory, new LatexBuilder.Input(texPath, srcDir, targetDir, null)));
   }
 
 }
