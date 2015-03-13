@@ -20,7 +20,7 @@ public class Main {
     Path srcDir = new RelativePath(root, "src-latex-simple");
     Path targetDir = new RelativePath(root, "bin-latex-simple");
     
-    BuildManager.build(new BuildRequest<>(LatexBuilder.factory, new LatexBuilder.Input("doc", srcDir, targetDir, null)));
+    BuildManager.build(new BuildRequest<>(Latex.factory, new Latex.Input("doc", srcDir, targetDir, null)));
   }
 
 }

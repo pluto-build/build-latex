@@ -18,13 +18,13 @@ import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.util.Pair;
 
-public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
+public class Latex extends Builder<Latex.Input, None> {
 
-  public final static BuilderFactory<Input, None, LatexBuilder> factory = new BuilderFactory<Input, None, LatexBuilder>() {
+  public final static BuilderFactory<Input, None, Latex> factory = new BuilderFactory<Input, None, Latex>() {
     private static final long serialVersionUID = 357011347823016858L;
 
     @Override
-    public LatexBuilder makeBuilder(Input input) { return new LatexBuilder(input); }
+    public Latex makeBuilder(Input input) { return new Latex(input); }
   };
 
   public static class Input implements Serializable {
@@ -41,7 +41,7 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
     }
   }
 
-  private LatexBuilder(Input input) {
+  private Latex(Input input) {
     super(input);
   }
   
@@ -68,12 +68,12 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
     Path targetDir = input.targetDir != null ? input.targetDir : new AbsolutePath(".");
 
     // because of self-cyclic dependency on aux file
-    requireBuild(LatexBuilder.factory, input);
+    requireBuild(Latex.factory, input);
     
 //    RelativePath texPath = new RelativePath(srcDir, input.docName + ".tex");
     RelativePath auxPath = new RelativePath(targetDir, input.docName + ".aux");
     if (FileCommands.exists(auxPath))
-      requireBuild(BibtexBuilder.factory, input);
+      requireBuild(Bibtex.factory, input);
 
     FileCommands.createDir(targetDir);
     String program = "pdflatex";
