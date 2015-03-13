@@ -1,5 +1,6 @@
 package org.sugarj.cleardep.buildlatex;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,7 +11,6 @@ import org.sugarj.cleardep.build.Builder;
 import org.sugarj.cleardep.build.BuilderFactory;
 import org.sugarj.cleardep.build.CycleSupport;
 import org.sugarj.cleardep.output.None;
-import org.sugarj.cleardep.stamp.ContentStamper;
 import org.sugarj.cleardep.stamp.LastModifiedStamper;
 import org.sugarj.cleardep.stamp.Stamper;
 import org.sugarj.common.CommandExecution;
@@ -31,12 +31,12 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
 
   public static class Input implements Serializable {
     private static final long serialVersionUID = -6065839202426934802L;
-    public final Path texPath;
+    public final String docName;
     public final Path srcDir;
     public final Path targetDir;
     public final AbsolutePath binaryLocation;
-    public Input(Path texPath, Path srcDir, Path targetDir, AbsolutePath binaryLocation) {
-      this.texPath = texPath;
+    public Input(String docName, Path srcDir, Path targetDir, AbsolutePath binaryLocation) {
+      this.docName = docName;
       this.srcDir = srcDir;
       this.targetDir = targetDir;
       this.binaryLocation = binaryLocation;
@@ -54,7 +54,7 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
 
   @Override
   protected String taskDescription() {
-    return "Build PDF from " + FileCommands.dropDirectory(input.texPath);
+    return "Build PDF for " + input.docName;
   }
 
   @Override
@@ -70,40 +70,36 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
   }
 
   @Override
-  protected None build() throws Throwable {
+  protected None build() throws IOException {
     Path srcDir = input.srcDir != null ? input.srcDir : new AbsolutePath(".");
     Path targetDir = input.targetDir != null ? input.targetDir : new AbsolutePath(".");
+
+    // because of self-cyclic dependency on aux file
+    requireBuild(LatexBuilder.factory, input);
     
-    RelativePath texPath = FileCommands.getRelativePath(srcDir, input.texPath);
-    if (texPath == null)
-      throw new IllegalArgumentException("Builder requires tex file to be within the source directory.");
-    
-    require(LatexBuilder.factory, input);
-    
-    RelativePath auxPath = FileCommands.replaceExtension(new RelativePath(targetDir, texPath.getRelativePath()), "aux");
-    if (FileCommands.exists(auxPath)) {
-      require(BibtexBuilder.factory, new BibtexBuilder.Input(input.texPath, auxPath, srcDir, targetDir, this.input.binaryLocation));
-    }
-    
+//    RelativePath texPath = new RelativePath(srcDir, input.docName + ".tex");
+    RelativePath auxPath = new RelativePath(targetDir, input.docName + ".aux");
+    if (FileCommands.exists(auxPath))
+      requireBuild(BibtexBuilder.factory, input);
 
     FileCommands.createDir(targetDir);
     String program = "pdflatex";
-    if (input.binaryLocation != null) {
+    if (input.binaryLocation != null)
       program = input.binaryLocation.getAbsolutePath() + "/" + program;
-    }
+    
     String[][] msgs = new CommandExecution(true).execute(srcDir, 
         program, 
         "-interaction=batchmode", 
         "-output-directory=" + targetDir.getAbsolutePath(),
         "-kpathsea-debug=4",
-        FileCommands.dropDirectory(input.texPath));
+        input.docName + ".tex");
 
     Pair<List<Path>, List<Path>> readWriteFiles = extractAccessedFiles(msgs[1]);
     for (Path p : readWriteFiles.b)
       if (!FileCommands.getExtension(p).equals("log"))
-        generates(p);
+        generate(p);
     for (Path p : readWriteFiles.a)
-      requires(p);
+      require(p);
     
     return None.val;
   }

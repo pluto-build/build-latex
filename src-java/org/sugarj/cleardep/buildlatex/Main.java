@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import org.sugarj.cleardep.build.BuildManager;
 import org.sugarj.cleardep.build.BuildRequest;
-import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
@@ -20,12 +19,8 @@ public class Main {
     
     Path srcDir = new RelativePath(root, "src-latex-simple");
     Path targetDir = new RelativePath(root, "bin-latex-simple");
-    Path texPath = new RelativePath(srcDir, "doc.tex");
     
-    // Rebuilding currently not supported because of missing cycle detecting in rebuild algo
-    FileCommands.delete(LatexBuilder.factory.makeBuilder(new LatexBuilder.Input(texPath, srcDir, targetDir, null)).persistentPath());
-    
-    BuildManager.build(new BuildRequest<>(LatexBuilder.factory, new LatexBuilder.Input(texPath, srcDir, targetDir, null)));
+    BuildManager.build(new BuildRequest<>(LatexBuilder.factory, new LatexBuilder.Input("doc", srcDir, targetDir, null)));
   }
 
 }
