@@ -11,8 +11,6 @@ import org.sugarj.cleardep.build.Builder;
 import org.sugarj.cleardep.build.BuilderFactory;
 import org.sugarj.cleardep.build.CycleSupport;
 import org.sugarj.cleardep.output.None;
-import org.sugarj.cleardep.stamp.LastModifiedStamper;
-import org.sugarj.cleardep.stamp.Stamper;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.AbsolutePath;
@@ -62,11 +60,6 @@ public class LatexBuilder extends Builder<LatexBuilder.Input, None> {
     if (input.targetDir != null)
       return new RelativePath(input.targetDir, "latex.dep");
     return new AbsolutePath("./latex.dep");
-  }
-
-  @Override
-  protected Stamper defaultStamper() {
-    return LastModifiedStamper.instance;
   }
 
   @Override

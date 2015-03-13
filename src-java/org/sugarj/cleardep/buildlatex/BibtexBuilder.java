@@ -8,8 +8,6 @@ import org.sugarj.cleardep.build.BuilderFactory;
 import org.sugarj.cleardep.build.CycleSupport;
 import org.sugarj.cleardep.buildlatex.LatexBuilder.Input;
 import org.sugarj.cleardep.output.None;
-import org.sugarj.cleardep.stamp.LastModifiedStamper;
-import org.sugarj.cleardep.stamp.Stamper;
 import org.sugarj.cleardep.stamp.ValueStamp;
 import org.sugarj.common.CommandExecution;
 import org.sugarj.common.FileCommands;
@@ -46,11 +44,6 @@ public class BibtexBuilder extends Builder<LatexBuilder.Input, None> {
     if (input.targetDir != null)
       return new RelativePath(input.targetDir, "bibtex.dep");
     return new AbsolutePath("./bibtex.dep");
-  }
-
-  @Override
-  protected Stamper defaultStamper() {
-    return LastModifiedStamper.instance;
   }
 
   @Override
