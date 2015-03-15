@@ -10,17 +10,17 @@ import java.util.Set;
 import org.sugarj.cleardep.build.Builder;
 import org.sugarj.cleardep.build.BuilderFactory;
 import org.sugarj.cleardep.build.CycleSupport;
-import org.sugarj.cleardep.output.None;
-import org.sugarj.common.CommandExecution;
+import org.sugarj.common.Exec;
+import org.sugarj.common.Exec.ExecutionResult;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.util.Pair;
 
-public class Latex extends Builder<Latex.Input, None> {
+public class Latex extends Builder<Latex.Input, Path> {
 
-  public final static BuilderFactory<Input, None, Latex> factory = new BuilderFactory<Input, None, Latex>() {
+  public final static BuilderFactory<Input, Path, Latex> factory = new BuilderFactory<Input, Path, Latex>() {
     private static final long serialVersionUID = 357011347823016858L;
 
     @Override
@@ -63,7 +63,7 @@ public class Latex extends Builder<Latex.Input, None> {
   }
 
   @Override
-  protected None build() throws IOException {
+  protected Path build() throws IOException {
     Path srcDir = input.srcDir != null ? input.srcDir : new AbsolutePath(".");
     Path targetDir = input.targetDir != null ? input.targetDir : new AbsolutePath(".");
 
@@ -80,21 +80,21 @@ public class Latex extends Builder<Latex.Input, None> {
     if (input.binaryLocation != null)
       program = input.binaryLocation.getAbsolutePath() + "/" + program;
     
-    String[][] msgs = new CommandExecution(true).execute(srcDir, 
+    ExecutionResult msgs = Exec.run(srcDir, 
         program, 
         "-interaction=batchmode", 
         "-output-directory=" + targetDir.getAbsolutePath(),
         "-kpathsea-debug=4",
         input.docName + ".tex");
 
-    Pair<List<Path>, List<Path>> readWriteFiles = extractAccessedFiles(msgs[1]);
+    Pair<List<Path>, List<Path>> readWriteFiles = extractAccessedFiles(msgs.errMsgs);
     for (Path p : readWriteFiles.b)
       if (!FileCommands.getExtension(p).equals("log"))
         generate(p);
     for (Path p : readWriteFiles.a)
       require(p);
     
-    return None.val;
+    return new RelativePath(targetDir, input.docName + "pdf");
   }
 
   private Pair<List<Path>, List<Path>> extractAccessedFiles(String[] lines) {

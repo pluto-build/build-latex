@@ -9,7 +9,7 @@ import org.sugarj.cleardep.build.CycleSupport;
 import org.sugarj.cleardep.buildlatex.Latex.Input;
 import org.sugarj.cleardep.output.None;
 import org.sugarj.cleardep.stamp.ValueStamp;
-import org.sugarj.common.CommandExecution;
+import org.sugarj.common.Exec;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
@@ -78,7 +78,7 @@ public class Bibtex extends Builder<Latex.Input, None> {
     if (input.binaryLocation != null) {
       program = input.binaryLocation.getAbsolutePath() + "/" + program;
     }
-    new CommandExecution(false).execute(targetDir, program, input.docName);
+    Exec.run(targetDir, program, input.docName);
 
     Path bbl = auxPath.replaceExtension("bbl");
     generate(bbl);
