@@ -67,14 +67,10 @@ public class Latex extends Builder<Latex.Input, Path> {
     Path srcDir = input.srcDir != null ? input.srcDir : new AbsolutePath(".");
     Path targetDir = input.targetDir != null ? input.targetDir : new AbsolutePath(".");
 
+    requireBuild(Bibtex.factory, input);
     // because of self-cyclic dependency on aux file
-    requireBuild(Latex.factory, input);
+//    requireBuild(Latex.factory, input);
     
-//    RelativePath texPath = new RelativePath(srcDir, input.docName + ".tex");
-    RelativePath auxPath = new RelativePath(targetDir, input.docName + ".aux");
-    if (FileCommands.exists(auxPath))
-      requireBuild(Bibtex.factory, input);
-
     FileCommands.createDir(targetDir);
     String program = "pdflatex";
     if (input.binaryLocation != null)

@@ -55,6 +55,9 @@ public class Bibtex extends Builder<Latex.Input, None> {
     Path targetDir = input.targetDir != null ? input.targetDir : new AbsolutePath(".");
 
     RelativePath auxPath = new RelativePath(targetDir, input.docName + ".aux");
+    if (!FileCommands.exists(auxPath))
+      return None.val;
+      
     ValueStamp<Pair<Map<String,String>, Set<String>>> bibtexSourceStamp = BibtexAuxRequirementsStamper.instance.stampOf(auxPath);
     require(auxPath, bibtexSourceStamp);
 
