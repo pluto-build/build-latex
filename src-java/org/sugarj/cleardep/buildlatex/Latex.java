@@ -72,15 +72,11 @@ public class Latex extends Builder<Latex.Input, Path> {
       program = input.binaryLocation.getAbsolutePath() + "/" + program;
 
     requireBuild(Bibtex.factory, input);
-    // because of self-reference via *.aux file
-    requireBuild(Latex.factory, input);
 
     RelativePath tex = new RelativePath(srcDir, input.docName + ".tex");
     RelativePath aux = new RelativePath(targetDir, input.docName + ".aux");
-    RelativePath bbl = new RelativePath(targetDir, input.docName + ".bbl");
     require(tex, FileHashStamper.instance);
     require(aux, FileHashStamper.instance);
-    require(bbl, FileHashStamper.instance);
 
     FileCommands.createDir(targetDir);
     ExecutionResult msgs = Exec.run(srcDir, 
@@ -92,8 +88,7 @@ public class Latex extends Builder<Latex.Input, Path> {
 
     Pair<List<Path>, List<Path>> readWriteFiles = extractAccessedFiles(msgs.errMsgs);
     for (Path p : readWriteFiles.b)
-      if (!FileCommands.getExtension(p).equals("log"))
-        generate(p);
+      generate(p);
     for (Path p : readWriteFiles.a)
       require(p);
     
@@ -127,7 +122,7 @@ public class Latex extends Builder<Latex.Input, Path> {
           rel = new RelativePath(srcDir, file);
         }
         
-        if (FileCommands.exists(rel) && "r".equals(mode) && readPaths.add(rel))
+        if ("r".equals(mode) && readPaths.add(rel))
           readPathList.add(rel);
         else if ("w".equals(mode) && writePaths.add(rel))
           writePathList.add(rel);
