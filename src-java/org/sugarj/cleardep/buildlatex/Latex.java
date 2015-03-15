@@ -10,6 +10,7 @@ import java.util.Set;
 import org.sugarj.cleardep.build.Builder;
 import org.sugarj.cleardep.build.BuilderFactory;
 import org.sugarj.cleardep.build.CycleSupport;
+import org.sugarj.cleardep.stamp.FileHashStamper;
 import org.sugarj.common.Exec;
 import org.sugarj.common.Exec.ExecutionResult;
 import org.sugarj.common.FileCommands;
@@ -66,16 +67,22 @@ public class Latex extends Builder<Latex.Input, Path> {
   protected Path build() throws IOException {
     Path srcDir = input.srcDir != null ? input.srcDir : new AbsolutePath(".");
     Path targetDir = input.targetDir != null ? input.targetDir : new AbsolutePath(".");
-
-    requireBuild(Bibtex.factory, input);
-    // because of self-cyclic dependency on aux file
-//    requireBuild(Latex.factory, input);
-    
-    FileCommands.createDir(targetDir);
     String program = "pdflatex";
     if (input.binaryLocation != null)
       program = input.binaryLocation.getAbsolutePath() + "/" + program;
-    
+
+    requireBuild(Bibtex.factory, input);
+    // because of self-reference via *.aux file
+    requireBuild(Latex.factory, input);
+
+    RelativePath tex = new RelativePath(srcDir, input.docName + ".tex");
+    RelativePath aux = new RelativePath(targetDir, input.docName + ".aux");
+    RelativePath bbl = new RelativePath(targetDir, input.docName + ".bbl");
+    require(tex, FileHashStamper.instance);
+    require(aux, FileHashStamper.instance);
+    require(bbl, FileHashStamper.instance);
+
+    FileCommands.createDir(targetDir);
     ExecutionResult msgs = Exec.run(srcDir, 
         program, 
         "-interaction=batchmode", 
