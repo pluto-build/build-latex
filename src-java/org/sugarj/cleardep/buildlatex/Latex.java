@@ -88,7 +88,7 @@ public class Latex extends Builder<Latex.Input, Path> {
 
     Pair<List<Path>, List<Path>> readWriteFiles = extractAccessedFiles(msgs.errMsgs);
     for (Path p : readWriteFiles.b)
-      generate(p);
+      provide(p);
     for (Path p : readWriteFiles.a)
       require(p);
     

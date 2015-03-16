@@ -74,7 +74,7 @@ public class Bibtex extends Builder<Latex.Input, None> {
   
         require(srcbib);
         FileCommands.copyFile(srcbib, buildbib);
-        generate(buildbib);
+        provide(buildbib);
       }
 
     String program = "bibtex";
@@ -84,7 +84,7 @@ public class Bibtex extends Builder<Latex.Input, None> {
     Exec.run(targetDir, program, input.docName);
 
     Path bbl = auxPath.replaceExtension("bbl");
-    generate(bbl);
+    provide(bbl);
     
     return None.val;
   }
