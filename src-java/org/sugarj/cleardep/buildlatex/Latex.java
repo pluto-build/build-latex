@@ -10,6 +10,7 @@ import java.util.Set;
 import org.sugarj.cleardep.build.Builder;
 import org.sugarj.cleardep.build.BuilderFactory;
 import org.sugarj.cleardep.build.CycleSupport;
+import org.sugarj.cleardep.build.FixpointCycleSupport;
 import org.sugarj.cleardep.stamp.FileHashStamper;
 import org.sugarj.common.Exec;
 import org.sugarj.common.Exec.ExecutionResult;
@@ -48,11 +49,11 @@ public class Latex extends Builder<Latex.Input, Path> {
   
   @Override
   protected CycleSupport getCycleSupport() {
-    return new LatexBibtexCycleSupport();
+    return new FixpointCycleSupport(Bibtex.factory, Latex.factory);
   }
 
   @Override
-  protected String taskDescription() {
+  protected String description() {
     return "Build PDF for " + input.docName;
   }
 

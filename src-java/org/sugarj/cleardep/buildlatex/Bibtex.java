@@ -6,6 +6,7 @@ import java.util.Set;
 import org.sugarj.cleardep.build.Builder;
 import org.sugarj.cleardep.build.BuilderFactory;
 import org.sugarj.cleardep.build.CycleSupport;
+import org.sugarj.cleardep.build.FixpointCycleSupport;
 import org.sugarj.cleardep.buildlatex.Latex.Input;
 import org.sugarj.cleardep.output.None;
 import org.sugarj.cleardep.stamp.ValueStamp;
@@ -31,11 +32,11 @@ public class Bibtex extends Builder<Latex.Input, None> {
   
   @Override
   protected CycleSupport getCycleSupport() {
-    return new LatexBibtexCycleSupport();
+    return new FixpointCycleSupport(Bibtex.factory, Latex.factory);
   }
 
   @Override
-  protected String taskDescription() {
+  protected String description() {
     return "Build bibliography for " + input.docName;
   }
 
