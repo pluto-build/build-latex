@@ -13,12 +13,12 @@ import org.sugarj.common.path.Path;
 import org.sugarj.common.util.Pair;
 
 
-public class BibtexAuxRequirementsStamper implements Stamper {
+public class BibtexAuxStamper implements Stamper {
   
   private static final long serialVersionUID = 5441596559010960001L;
 
-  public static BibtexAuxRequirementsStamper instance = new BibtexAuxRequirementsStamper();
-  private BibtexAuxRequirementsStamper() { }
+  public static BibtexAuxStamper instance = new BibtexAuxStamper();
+  private BibtexAuxStamper() { }
   
   @Override
   public ValueStamp<Pair<Map<String, String>, Set<String>>> stampOf(Path p) {

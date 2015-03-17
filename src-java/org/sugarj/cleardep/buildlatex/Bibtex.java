@@ -49,17 +49,20 @@ public class Bibtex extends Builder<Latex.Input, None> {
 
   @Override
   protected None build() throws Throwable {
-    
-    requireBuild(Latex.factory, input);
-    
     Path srcDir = input.srcDir != null ? input.srcDir : new AbsolutePath(".");
     Path targetDir = input.targetDir != null ? input.targetDir : new AbsolutePath(".");
+    String program = "bibtex";
+    if (input.binaryLocation != null) {
+      program = input.binaryLocation.getAbsolutePath() + "/" + program;
+    }
 
+    requireBuild(Latex.factory, input);
+    
     RelativePath auxPath = new RelativePath(targetDir, input.docName + ".aux");
     if (!FileCommands.exists(auxPath))
       return None.val;
       
-    ValueStamp<Pair<Map<String,String>, Set<String>>> bibtexSourceStamp = BibtexAuxRequirementsStamper.instance.stampOf(auxPath);
+    ValueStamp<Pair<Map<String,String>, Set<String>>> bibtexSourceStamp = BibtexAuxStamper.instance.stampOf(auxPath);
     require(auxPath, bibtexSourceStamp);
 
     if (!FileCommands.exists(auxPath))
@@ -78,10 +81,6 @@ public class Bibtex extends Builder<Latex.Input, None> {
         provide(buildbib);
       }
 
-    String program = "bibtex";
-    if (input.binaryLocation != null) {
-      program = input.binaryLocation.getAbsolutePath() + "/" + program;
-    }
     Exec.run(targetDir, program, input.docName);
 
     Path bbl = auxPath.replaceExtension("bbl");

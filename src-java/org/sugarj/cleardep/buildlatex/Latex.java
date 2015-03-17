@@ -91,7 +91,8 @@ public class Latex extends Builder<Latex.Input, Path> {
     for (Path p : readWriteFiles.b)
       provide(p);
     for (Path p : readWriteFiles.a)
-      require(p);
+      if (!p.equals(tex) && !p.equals(aux))
+        require(p);
     
     return new RelativePath(targetDir, input.docName + "pdf");
   }
@@ -123,9 +124,9 @@ public class Latex extends Builder<Latex.Input, Path> {
           rel = new RelativePath(srcDir, file);
         }
         
-        if ("r".equals(mode) && readPaths.add(rel))
+        if (rel != null && "r".equals(mode) && readPaths.add(rel))
           readPathList.add(rel);
-        else if ("w".equals(mode) && writePaths.add(rel))
+        else if (rel != null && "w".equals(mode) && writePaths.add(rel))
           writePathList.add(rel);
       }
     return Pair.create(readPathList, writePathList);
