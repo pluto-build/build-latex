@@ -6,11 +6,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.sugarj.cleardep.stamp.Stamper;
-import org.sugarj.cleardep.stamp.ValueStamp;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.util.Pair;
+
+import build.pluto.stamp.Stamper;
+import build.pluto.stamp.ValueStamp;
 
 
 public class BibtexAuxStamper implements Stamper {

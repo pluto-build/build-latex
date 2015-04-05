@@ -7,11 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.sugarj.cleardep.build.Builder;
-import org.sugarj.cleardep.build.BuilderFactory;
-import org.sugarj.cleardep.build.CycleSupport;
-import org.sugarj.cleardep.build.FixpointCycleSupport;
-import org.sugarj.cleardep.stamp.FileHashStamper;
 import org.sugarj.common.Exec;
 import org.sugarj.common.Exec.ExecutionResult;
 import org.sugarj.common.FileCommands;
@@ -19,6 +14,12 @@ import org.sugarj.common.path.AbsolutePath;
 import org.sugarj.common.path.Path;
 import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.util.Pair;
+
+import build.pluto.builder.Builder;
+import build.pluto.builder.BuilderFactory;
+import build.pluto.builder.CycleSupport;
+import build.pluto.builder.FixpointCycleSupport;
+import build.pluto.stamp.FileHashStamper;
 
 public class Latex extends Builder<Latex.Input, Path> {
 
