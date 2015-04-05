@@ -1,4 +1,4 @@
-package org.sugarj.cleardep.buildlatex;
+package build.pluto.buildlatex;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;

@@ -1,4 +1,4 @@
-package org.sugarj.cleardep.buildlatex;
+package build.pluto.buildlatex;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;

@@ -1,9 +1,8 @@
-package org.sugarj.cleardep.buildlatex;
+package build.pluto.buildlatex;
 
 import java.util.Map;
 import java.util.Set;
 
-import org.sugarj.cleardep.buildlatex.Latex.Input;
 import org.sugarj.common.Exec;
 import org.sugarj.common.FileCommands;
 import org.sugarj.common.path.AbsolutePath;
@@ -15,6 +14,7 @@ import build.pluto.builder.Builder;
 import build.pluto.builder.BuilderFactory;
 import build.pluto.builder.CycleSupport;
 import build.pluto.builder.FixpointCycleSupport;
+import build.pluto.buildlatex.Latex.Input;
 import build.pluto.output.None;
 import build.pluto.stamp.ValueStamp;
 
