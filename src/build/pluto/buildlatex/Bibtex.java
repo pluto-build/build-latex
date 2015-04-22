@@ -2,6 +2,7 @@ package build.pluto.buildlatex;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.Set;
 
@@ -77,7 +78,7 @@ public class Bibtex extends Builder<Latex.Input, Out<File>> {
         File buildbib = new File(targetDir, bibname + ".bib");
   
         require(srcbib);
-        Files.copy(srcbib.toPath(), buildbib.toPath());
+        Files.copy(srcbib.toPath(), buildbib.toPath(), StandardCopyOption.REPLACE_EXISTING);
         provide(buildbib);
       }
 

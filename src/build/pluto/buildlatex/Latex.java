@@ -4,12 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.sugarj.common.Exec;
+import org.sugarj.common.Log;
 import org.sugarj.common.Exec.ExecutionResult;
 import org.sugarj.common.util.Pair;
 
@@ -36,10 +39,11 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
     public final File targetDir;
     public final File binaryLocation;
     public Input(String docName, File srcDir, File targetDir, File binaryLocation) {
-      this.docName = docName;
+      this.docName = Objects.requireNonNull(docName, "Latex builder requieres docName parameter");
       this.srcDir = srcDir;
       this.targetDir = targetDir;
       this.binaryLocation = binaryLocation;
+      Log.log.setLoggingLevel(Log.ALWAYS);
     }
   }
 
@@ -94,7 +98,7 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
       if (!p.equals(tex) && !p.equals(aux))
         require(p);
     
-    return new Out<>(new File(targetDir, input.docName + "pdf"));
+    return new Out<>(new File(targetDir, input.docName + ".pdf"));
   }
 
   private Pair<List<File>, List<File>> extractAccessedFiles(String[] lines) {
@@ -102,30 +106,31 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
     File targetDir = input.targetDir != null ? input.targetDir : new File(".");
     
     List<File> readPathList = new ArrayList<>();
-    Set<File> readPaths = new HashSet<>();
+    Set<Path> readPaths = new HashSet<>();
     List<File> writePathList = new ArrayList<>();
-    Set<File> writePaths = new HashSet<>();
+    Set<Path> writePaths = new HashSet<>();
     for (String line : lines)
       if (line.startsWith("kdebug:fopen(")) {
         int start = "kdebug:fopen(".length();
         int end = line.indexOf(',');
-        File file = new File(line.substring(start, end));
+        Path path = new File(line.substring(start, end)).toPath();
         String mode = line.substring(end + 2, end + 3);
         
         boolean include = false;
-        if (file.toPath().startsWith(srcDir.toPath()))
+        if (path.startsWith(srcDir.toPath()))
           include = true;
-        else if (file.toPath().startsWith(targetDir.toPath()))
+        else if (path.startsWith(targetDir.toPath()))
           include = true;
-        else if (file.getPath().startsWith("./")) {
-          file = file.toPath().relativize(file.toPath().getRoot()).toFile();
+        else if (path.startsWith("./")) {
+          path = path.subpath(1, path.getNameCount());
+          path = srcDir.toPath().resolve(path);
           include = true;
         }
         
-        if (include && "r".equals(mode) && readPaths.add(file))
-          readPathList.add(file);
-        else if (include && "w".equals(mode) && writePaths.add(file))
-          writePathList.add(file);
+        if (include && "r".equals(mode) && readPaths.add(path))
+          readPathList.add(path.toFile());
+        else if (include && "w".equals(mode) && writePaths.add(path))
+          writePathList.add(path.toFile());
       }
     return Pair.create(readPathList, writePathList);
   }
