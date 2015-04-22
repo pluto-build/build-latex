@@ -1,4 +1,5 @@
 package build.pluto.buildlatex;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
@@ -7,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.sugarj.common.FileCommands;
-import org.sugarj.common.path.Path;
 import org.sugarj.common.util.Pair;
 
 import build.pluto.stamp.Stamper;
@@ -22,7 +22,7 @@ public class BibtexAuxStamper implements Stamper {
   private BibtexAuxStamper() { }
   
   @Override
-  public ValueStamp<Pair<Map<String, String>, Set<String>>> stampOf(Path p) {
+  public ValueStamp<Pair<Map<String, String>, Set<String>>> stampOf(File p) {
     String content;
     try {
       content = FileCommands.readFileAsString(p);

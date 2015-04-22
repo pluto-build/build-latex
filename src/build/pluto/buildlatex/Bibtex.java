@@ -1,13 +1,12 @@
 package build.pluto.buildlatex;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Set;
 
 import org.sugarj.common.Exec;
 import org.sugarj.common.FileCommands;
-import org.sugarj.common.path.AbsolutePath;
-import org.sugarj.common.path.Path;
-import org.sugarj.common.path.RelativePath;
 import org.sugarj.common.util.Pair;
 
 import build.pluto.builder.Builder;
@@ -15,12 +14,12 @@ import build.pluto.builder.BuilderFactory;
 import build.pluto.builder.CycleSupport;
 import build.pluto.builder.FixpointCycleSupport;
 import build.pluto.buildlatex.Latex.Input;
-import build.pluto.output.None;
+import build.pluto.output.Out;
 import build.pluto.stamp.ValueStamp;
 
-public class Bibtex extends Builder<Latex.Input, None> {
+public class Bibtex extends Builder<Latex.Input, Out<File>> {
 
-  public final static BuilderFactory<Input, None, Bibtex> factory = new BuilderFactory<Input, None, Bibtex>() {
+  public final static BuilderFactory<Input, Out<File>, Bibtex> factory = new BuilderFactory<Input, Out<File>, Bibtex>() {
     private static final long serialVersionUID = 2390540998732457948L;
 
     @Override
@@ -42,16 +41,16 @@ public class Bibtex extends Builder<Latex.Input, None> {
   }
 
   @Override
-  protected Path persistentPath() {
+  protected File persistentPath() {
     if (input.targetDir != null)
-      return new RelativePath(input.targetDir, "bibtex.dep");
-    return new AbsolutePath("./bibtex.dep");
+      return new File(input.targetDir, "bibtex.dep");
+    return new File("./bibtex.dep");
   }
 
   @Override
-  protected None build() throws Throwable {
-    Path srcDir = input.srcDir != null ? input.srcDir : new AbsolutePath(".");
-    Path targetDir = input.targetDir != null ? input.targetDir : new AbsolutePath(".");
+  protected Out<File> build() throws Throwable {
+    File srcDir = input.srcDir != null ? input.srcDir : new File(".");
+    File targetDir = input.targetDir != null ? input.targetDir : new File(".");
     String program = "bibtex";
     if (input.binaryLocation != null) {
       program = input.binaryLocation.getAbsolutePath() + "/" + program;
@@ -59,35 +58,35 @@ public class Bibtex extends Builder<Latex.Input, None> {
 
     requireBuild(Latex.factory, input);
     
-    RelativePath auxPath = new RelativePath(targetDir, input.docName + ".aux");
-    if (!FileCommands.exists(auxPath))
-      return None.val;
+    File auxPath = new File(targetDir, input.docName + ".aux");
+    if (!Files.exists(auxPath.toPath()))
+      return new Out<>(null);
       
     ValueStamp<Pair<Map<String,String>, Set<String>>> bibtexSourceStamp = BibtexAuxStamper.instance.stampOf(auxPath);
     require(auxPath, bibtexSourceStamp);
 
-    if (!FileCommands.exists(auxPath))
+    if (!Files.exists(auxPath.toPath()))
       throw new IllegalArgumentException("No bibliography built: Could not find " + auxPath);
     
     Set<String> bibnames = bibtexSourceStamp.val.a.keySet();
-    
-    FileCommands.createDir(targetDir);
+
+    Files.createDirectories(targetDir.toPath());
     if (srcDir != null && targetDir != null && !srcDir.equals(targetDir))
       for (String bibname : bibnames) {
-        RelativePath srcbib = new RelativePath(srcDir, bibname + ".bib");
-        RelativePath buildbib = new RelativePath(targetDir, bibname + ".bib");
+        File srcbib = new File(srcDir, bibname + ".bib");
+        File buildbib = new File(targetDir, bibname + ".bib");
   
         require(srcbib);
-        FileCommands.copyFile(srcbib, buildbib);
+        Files.copy(srcbib.toPath(), buildbib.toPath());
         provide(buildbib);
       }
 
     Exec.run(targetDir, program, input.docName);
 
-    Path bbl = auxPath.replaceExtension("bbl");
+    File bbl = FileCommands.replaceExtension(auxPath, "bbl");
     provide(bbl);
     
-    return None.val;
+    return new Out<>(bbl);
   }
   
 }
