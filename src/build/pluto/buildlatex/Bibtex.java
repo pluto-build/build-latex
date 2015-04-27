@@ -8,14 +8,19 @@ import java.util.Set;
 
 import org.sugarj.common.Exec;
 import org.sugarj.common.FileCommands;
+import org.sugarj.common.Log;
 import org.sugarj.common.util.Pair;
 
+import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.BuilderFactory;
 import build.pluto.builder.CycleSupport;
 import build.pluto.builder.FixpointCycleSupport;
 import build.pluto.buildlatex.Latex.Input;
 import build.pluto.output.Out;
+import build.pluto.stamp.FileContentStamper;
+import build.pluto.stamp.IgnoreOutputStamper;
+import build.pluto.stamp.Stamper;
 import build.pluto.stamp.ValueStamp;
 
 public class Bibtex extends Builder<Latex.Input, Out<File>> {
@@ -49,6 +54,11 @@ public class Bibtex extends Builder<Latex.Input, Out<File>> {
   }
 
   @Override
+  protected Stamper defaultStamper() {
+    return FileContentStamper.instance;
+  }
+
+  @Override
   protected Out<File> build() throws Throwable {
     File srcDir = input.srcDir != null ? input.srcDir : new File(".");
     File targetDir = input.targetDir != null ? input.targetDir : new File(".");
@@ -57,18 +67,19 @@ public class Bibtex extends Builder<Latex.Input, Out<File>> {
       program = input.binaryLocation.getAbsolutePath() + "/" + program;
     }
 
-    requireBuild(Latex.factory, input);
+    requireBuild(new BuildRequest<>(Latex.factory, input, IgnoreOutputStamper.instance));
     
     File auxPath = new File(targetDir, input.docName + ".aux");
-    if (!Files.exists(auxPath.toPath()))
-      return new Out<>(null);
-      
-    ValueStamp<Pair<Map<String,String>, Set<String>>> bibtexSourceStamp = BibtexAuxStamper.instance.stampOf(auxPath);
+    ValueStamp<Pair<Map<String, String>, Set<String>>> bibtexSourceStamp = BibtexAuxStamper.instance.stampOf(auxPath);
     require(auxPath, bibtexSourceStamp);
 
-    if (!Files.exists(auxPath.toPath()))
-      throw new IllegalArgumentException("No bibliography built: Could not find " + auxPath);
-    
+    if (!Files.exists(auxPath.toPath())) {
+      Log.log.log("No Aux file at " + auxPath + " found", Log.CORE);
+      return new Out<>(null);
+    }
+
+    Log.log.log("Bibtex for " + input.docName, Log.IMPORT);
+
     Set<String> bibnames = bibtexSourceStamp.val.a.keySet();
 
     Files.createDirectories(targetDir.toPath());
@@ -82,9 +93,9 @@ public class Bibtex extends Builder<Latex.Input, Out<File>> {
         provide(buildbib);
       }
 
-    Exec.run(targetDir, program, input.docName);
+    Exec.run(false, targetDir, program, input.docName);
 
-    File bbl = FileCommands.replaceExtension(auxPath, "bbl");
+    File bbl = FileCommands.replaceExtension(auxPath.toPath(), "bbl").toFile();
     provide(bbl);
     
     return new Out<>(bbl);

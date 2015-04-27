@@ -12,8 +12,8 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.sugarj.common.Exec;
-import org.sugarj.common.Log;
 import org.sugarj.common.Exec.ExecutionResult;
+import org.sugarj.common.Log;
 import org.sugarj.common.util.Pair;
 
 import build.pluto.builder.Builder;
@@ -22,6 +22,8 @@ import build.pluto.builder.CycleSupport;
 import build.pluto.builder.FixpointCycleSupport;
 import build.pluto.output.Out;
 import build.pluto.stamp.FileHashStamper;
+import build.pluto.stamp.LastModifiedStamper;
+import build.pluto.stamp.Stamper;
 
 public class Latex extends Builder<Latex.Input, Out<File>> {
 
@@ -69,6 +71,11 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
   }
 
   @Override
+  protected Stamper defaultStamper() {
+    return LastModifiedStamper.instance;
+  }
+
+  @Override
   protected Out<File> build() throws IOException {
     File srcDir = input.srcDir != null ? input.srcDir : new File(".");
     File targetDir = input.targetDir != null ? input.targetDir : new File(".");
@@ -78,8 +85,11 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
 
     requireBuild(Bibtex.factory, input);
 
+    Log.log.log("Compile Latex " + input.docName, Log.IMPORT);
+
     File tex = new File(srcDir, input.docName + ".tex");
     File aux = new File(targetDir, input.docName + ".aux");
+
     require(tex, FileHashStamper.instance);
     require(aux, FileHashStamper.instance);
 
