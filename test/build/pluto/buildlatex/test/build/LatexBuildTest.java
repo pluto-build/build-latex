@@ -122,8 +122,12 @@ public class LatexBuildTest extends ScopedBuildTest {
     // Forget previous log
     log.getContent();
     // Do the build
+    File binaryPath = null;
+    if ("moritzlichter".equals(System.getProperty("user.name"))) {
+      binaryPath = new File("/opt/local/bin/");
+    }
     TrackingBuildManager manager = new TrackingBuildManager();
-    manager.require(Latex.factory, new Latex.Input("document", dir, dir, null));
+    manager.require(Latex.factory, new Latex.Input("document", dir, dir, binaryPath));
     return manager;
   }
 
