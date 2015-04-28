@@ -1,6 +1,11 @@
 sudo: false
 script: mvn deploy -U
 
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y texlive-core
+  - sudo apt-get install -y biblatex
+
 cache:
   directories:
     - '$HOME/.m2/repository'

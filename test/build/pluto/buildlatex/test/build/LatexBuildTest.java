@@ -123,7 +123,7 @@ public class LatexBuildTest extends ScopedBuildTest {
     log.getContent();
     // Do the build
     TrackingBuildManager manager = new TrackingBuildManager();
-    manager.require(Latex.factory, new Latex.Input("document", dir, dir, new File("/opt/local/bin/")));
+    manager.require(Latex.factory, new Latex.Input("document", dir, dir, null));
     return manager;
   }
 
