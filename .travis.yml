@@ -1,4 +1,5 @@
-sudo: false
+sudo: required
+
 script: mvn deploy -U
 
 before_install:
