@@ -13,7 +13,6 @@ import java.util.Set;
 
 import org.sugarj.common.Exec;
 import org.sugarj.common.Exec.ExecutionResult;
-import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.util.Pair;
 
@@ -25,6 +24,7 @@ import build.pluto.output.Out;
 import build.pluto.stamp.FileHashStamper;
 import build.pluto.stamp.LastModifiedStamper;
 import build.pluto.stamp.Stamper;
+import build.pluto.util.AbsoluteComparedFile;
 
 public class Latex extends Builder<Latex.Input, Out<File>> {
 
@@ -84,7 +84,8 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
     if (input.binaryLocation != null)
       program = input.binaryLocation.getAbsolutePath() + "/" + program;
 
-    requireBuild(Bibtex.factory, input);
+    Out<File> bblFileWrapper = requireBuild(Bibtex.factory, input);
+    File bblFile = bblFileWrapper.val;
 
     Log.log.log("Compile Latex " + input.docName, Log.IMPORT);
 
@@ -107,7 +108,7 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
       provide(p);
     for (File p : readWriteFiles.a)
       if (!p.equals(tex) && !p.equals(aux))
-        if ("bbl".equals(FileCommands.getExtension(p)))
+        if (AbsoluteComparedFile.equals(p, bblFile))
           require(p, FileHashStamper.instance);
         else
           require(p);
