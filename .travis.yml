@@ -4,8 +4,7 @@ script: mvn deploy -U
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -y texlive-core
-  - sudo apt-get install -y biblatex
+  - sudo apt-get install -y texlive-latex-base
 
 cache:
   directories:
