@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.sugarj.common.Exec;
 import org.sugarj.common.Exec.ExecutionResult;
+import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.util.Pair;
 
@@ -106,7 +107,10 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
       provide(p);
     for (File p : readWriteFiles.a)
       if (!p.equals(tex) && !p.equals(aux))
-        require(p);
+        if ("bbl".equals(FileCommands.getExtension(p)))
+          require(p, FileHashStamper.instance);
+        else
+          require(p);
     
     return new Out<>(new File(targetDir, input.docName + ".pdf"));
   }

@@ -29,13 +29,15 @@ public class Bibtex extends Builder<Latex.Input, Out<File>> {
     private static final long serialVersionUID = 2390540998732457948L;
 
     @Override
-    public Bibtex makeBuilder(Input input) { return new Bibtex(input); }
+    public Bibtex makeBuilder(Input input) {
+      return new Bibtex(input);
+    }
   };
-  
+
   private Bibtex(Input input) {
     super(input);
   }
-  
+
   @Override
   protected CycleSupport getCycleSupport() {
     return new FixpointCycleSupport(Bibtex.factory, Latex.factory);
@@ -68,7 +70,7 @@ public class Bibtex extends Builder<Latex.Input, Out<File>> {
     }
 
     requireBuild(new BuildRequest<>(Latex.factory, input, IgnoreOutputStamper.instance));
-    
+
     File auxPath = new File(targetDir, input.docName + ".aux");
     ValueStamp<Pair<Map<String, String>, Set<String>>> bibtexSourceStamp = BibtexAuxStamper.instance.stampOf(auxPath);
     require(auxPath, bibtexSourceStamp);
@@ -83,22 +85,24 @@ public class Bibtex extends Builder<Latex.Input, Out<File>> {
     Set<String> bibnames = bibtexSourceStamp.val.a.keySet();
 
     Files.createDirectories(targetDir.toPath());
-    if (srcDir != null && targetDir != null && !srcDir.equals(targetDir))
+    if (srcDir != null && targetDir != null)
       for (String bibname : bibnames) {
         File srcbib = new File(srcDir, bibname + ".bib");
-        File buildbib = new File(targetDir, bibname + ".bib");
-  
+        if (!srcDir.equals(targetDir)) {
+          File buildbib = new File(targetDir, bibname + ".bib");
+          Files.copy(srcbib.toPath(), buildbib.toPath(), StandardCopyOption.REPLACE_EXISTING);
+          provide(buildbib);
+        }
         require(srcbib);
-        Files.copy(srcbib.toPath(), buildbib.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        provide(buildbib);
+
       }
 
     Exec.run(false, targetDir, program, input.docName);
 
     File bbl = FileCommands.replaceExtension(auxPath.toPath(), "bbl").toFile();
     provide(bbl);
-    
+
     return new Out<>(bbl);
   }
-  
+
 }
