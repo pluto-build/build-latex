@@ -14,8 +14,7 @@ import org.sugarj.common.util.Pair;
 import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.BuilderFactory;
-import build.pluto.builder.CycleSupport;
-import build.pluto.builder.FixpointCycleSupport;
+import build.pluto.builder.CycleSupportFactory;
 import build.pluto.buildlatex.Latex.Input;
 import build.pluto.output.Out;
 import build.pluto.stamp.FileContentStamper;
@@ -39,8 +38,8 @@ public class Bibtex extends Builder<Latex.Input, Out<File>> {
   }
 
   @Override
-  protected CycleSupport getCycleSupport() {
-    return new FixpointCycleSupport(Bibtex.factory, Latex.factory);
+  protected CycleSupportFactory getCycleSupport() {
+    return Latex.latexBibtexCycleSupport;
   }
 
   @Override
