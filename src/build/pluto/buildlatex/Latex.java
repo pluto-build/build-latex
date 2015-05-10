@@ -57,12 +57,12 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
   }
 
   @Override
-  protected String description() {
+  protected String description(Latex.Input input) {
     return "Build PDF for " + input.docName;
   }
 
   @Override
-  protected File persistentPath() {
+  protected File persistentPath(Latex.Input input) {
     if (input.targetDir != null)
       return new File(input.targetDir, "latex.dep");
     return new File("./latex.dep");
@@ -74,7 +74,7 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
   }
 
   @Override
-  protected Out<File> build() throws IOException {
+  protected Out<File> build(Latex.Input input) throws IOException {
     File srcDir = input.srcDir != null ? input.srcDir : new File(".");
     File targetDir = input.targetDir != null ? input.targetDir : new File(".");
     String program = "pdflatex";
@@ -100,7 +100,7 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
         "-kpathsea-debug=4",
         input.docName + ".tex");
 
-    Pair<List<File>, List<File>> readWriteFiles = extractAccessedFiles(msgs.errMsgs);
+    Pair<List<File>, List<File>> readWriteFiles = extractAccessedFiles(input, msgs.errMsgs);
     for (File p : readWriteFiles.b)
       provide(p);
     for (File p : readWriteFiles.a)
@@ -113,7 +113,7 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
     return new Out<>(new File(targetDir, input.docName + ".pdf"));
   }
 
-  private Pair<List<File>, List<File>> extractAccessedFiles(String[] lines) {
+  private Pair<List<File>, List<File>> extractAccessedFiles(Latex.Input input, String[] lines) {
     File srcDir = input.srcDir != null ? input.srcDir : new File(".");
     File targetDir = input.targetDir != null ? input.targetDir : new File(".");
     

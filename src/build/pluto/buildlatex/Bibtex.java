@@ -43,12 +43,12 @@ public class Bibtex extends Builder<Latex.Input, Out<File>> {
   }
 
   @Override
-  protected String description() {
+  protected String description(Latex.Input input) {
     return "Build bibliography for " + input.docName;
   }
 
   @Override
-  protected File persistentPath() {
+  protected File persistentPath(Latex.Input input) {
     if (input.targetDir != null)
       return new File(input.targetDir, "bibtex.dep");
     return new File("./bibtex.dep");
@@ -60,7 +60,7 @@ public class Bibtex extends Builder<Latex.Input, Out<File>> {
   }
 
   @Override
-  protected Out<File> build() throws Throwable {
+  protected Out<File> build(Latex.Input input) throws Throwable {
     File srcDir = input.srcDir != null ? input.srcDir : new File(".");
     File targetDir = input.targetDir != null ? input.targetDir : new File(".");
     String program = "bibtex";
