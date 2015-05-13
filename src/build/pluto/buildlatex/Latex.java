@@ -29,7 +29,18 @@ import build.pluto.util.AbsoluteComparedFile;
 
 public class Latex extends Builder<Latex.Input, Out<File>> {
 
-  public static final BuilderFactory<Input, Out<File>, Latex> factory = Latex::new;
+  public static BuilderFactory<Input, Out<File>, Latex> factory = new BuilderFactory<Latex.Input, Out<File>, Latex>() {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 6114509507872837649L;
+
+    @Override
+    public Latex makeBuilder(Input input) {
+      return new Latex(input);
+    }
+  };
   public static final CycleSupportFactory latexBibtexCycleSupport = (BuildCycle cycle) -> new FixpointCycleSupport(cycle, Bibtex.factory, Latex.factory);
 
   public static class Input implements Serializable {
@@ -38,6 +49,7 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
     public final File srcDir;
     public final File targetDir;
     public final File binaryLocation;
+
     public Input(String docName, File srcDir, File targetDir, File binaryLocation) {
       this.docName = Objects.requireNonNull(docName, "Latex builder requieres docName parameter");
       this.srcDir = srcDir;
@@ -45,12 +57,13 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
       this.binaryLocation = binaryLocation;
       Log.log.setLoggingLevel(Log.ALWAYS);
     }
+
   }
 
   private Latex(Input input) {
     super(input);
   }
-  
+
   @Override
   protected CycleSupportFactory getCycleSupport() {
     return latexBibtexCycleSupport;
@@ -93,12 +106,7 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
     require(aux, FileHashStamper.instance);
 
     Files.createDirectories(targetDir.toPath());
-    ExecutionResult msgs = Exec.run(srcDir, 
-        program, 
-        "-interaction=batchmode", 
-        "-output-directory=" + targetDir.getAbsolutePath(),
-        "-kpathsea-debug=4",
-        input.docName + ".tex");
+    ExecutionResult msgs = Exec.run(srcDir, program, "-interaction=batchmode", "-output-directory=" + targetDir.getAbsolutePath(), "-kpathsea-debug=4", input.docName + ".tex");
 
     Pair<List<File>, List<File>> readWriteFiles = extractAccessedFiles(input, msgs.errMsgs);
     for (File p : readWriteFiles.b)
@@ -109,14 +117,14 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
           require(p, FileHashStamper.instance);
         else
           require(p);
-    
+
     return new Out<>(new File(targetDir, input.docName + ".pdf"));
   }
 
   private Pair<List<File>, List<File>> extractAccessedFiles(Latex.Input input, String[] lines) {
     File srcDir = input.srcDir != null ? input.srcDir : new File(".");
     File targetDir = input.targetDir != null ? input.targetDir : new File(".");
-    
+
     List<File> readPathList = new ArrayList<>();
     Set<Path> readPaths = new HashSet<>();
     List<File> writePathList = new ArrayList<>();
@@ -127,7 +135,7 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
         int end = line.indexOf(',');
         Path path = new File(line.substring(start, end)).toPath();
         String mode = line.substring(end + 2, end + 3);
-        
+
         boolean include = false;
         if (path.startsWith(srcDir.toPath()))
           include = true;
@@ -138,7 +146,7 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
           path = srcDir.toPath().resolve(path);
           include = true;
         }
-        
+
         if (include && "r".equals(mode) && readPaths.add(path))
           readPathList.add(path.toFile());
         else if (include && "w".equals(mode) && writePaths.add(path))
@@ -146,5 +154,5 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
       }
     return Pair.create(readPathList, writePathList);
   }
-  
+
 }
