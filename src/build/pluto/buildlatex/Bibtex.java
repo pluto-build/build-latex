@@ -24,16 +24,9 @@ import build.pluto.stamp.ValueStamp;
 
 public class Bibtex extends Builder<Latex.Input, Out<File>> {
 
-  public final static BuilderFactory<Input, Out<File>, Bibtex> factory = new BuilderFactory<Input, Out<File>, Bibtex>() {
-    private static final long serialVersionUID = 2390540998732457948L;
+  public final static BuilderFactory<Input, Out<File>, Bibtex> factory = BuilderFactory.of(Bibtex.class, Latex.Input.class);
 
-    @Override
-    public Bibtex makeBuilder(Input input) {
-      return new Bibtex(input);
-    }
-  };
-
-  private Bibtex(Input input) {
+  public Bibtex(Input input) {
     super(input);
   }
 

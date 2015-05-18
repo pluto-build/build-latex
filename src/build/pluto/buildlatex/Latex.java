@@ -29,18 +29,7 @@ import build.pluto.util.AbsoluteComparedFile;
 
 public class Latex extends Builder<Latex.Input, Out<File>> {
 
-  public static BuilderFactory<Input, Out<File>, Latex> factory = new BuilderFactory<Latex.Input, Out<File>, Latex>() {
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 6114509507872837649L;
-
-    @Override
-    public Latex makeBuilder(Input input) {
-      return new Latex(input);
-    }
-  };
+  public static BuilderFactory<Input, Out<File>, Latex> factory = BuilderFactory.of(Latex.class, Input.class);
   public static final CycleSupportFactory latexBibtexCycleSupport = (BuildCycle cycle) -> new FixpointCycleSupport(cycle, Bibtex.factory, Latex.factory);
 
   public static class Input implements Serializable {
@@ -60,7 +49,7 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
 
   }
 
-  private Latex(Input input) {
+  public Latex(Input input) {
     super(input);
   }
 
