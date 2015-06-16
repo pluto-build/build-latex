@@ -22,6 +22,7 @@ import build.pluto.builder.BuilderFactory;
 import build.pluto.builder.CycleSupportFactory;
 import build.pluto.builder.FixpointCycleSupport;
 import build.pluto.output.Out;
+import build.pluto.output.OutputPersisted;
 import build.pluto.stamp.FileHashStamper;
 import build.pluto.stamp.LastModifiedStamper;
 import build.pluto.stamp.Stamper;
@@ -84,7 +85,7 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
       program = input.binaryLocation.getAbsolutePath() + "/" + program;
 
     Out<File> bblFileWrapper = requireBuild(Bibtex.factory, input);
-    File bblFile = bblFileWrapper.val;
+    File bblFile = bblFileWrapper.val();
 
     Log.log.log("Compile Latex " + input.docName, Log.IMPORT);
 
@@ -107,7 +108,7 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
         else
           require(p);
 
-    return new Out<>(new File(targetDir, input.docName + ".pdf"));
+    return OutputPersisted.of(new File(targetDir, input.docName + ".pdf"));
   }
 
   private Pair<List<File>, List<File>> extractAccessedFiles(Latex.Input input, String[] lines) {

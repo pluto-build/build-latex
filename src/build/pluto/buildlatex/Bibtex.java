@@ -17,6 +17,7 @@ import build.pluto.builder.BuilderFactory;
 import build.pluto.builder.CycleSupportFactory;
 import build.pluto.buildlatex.Latex.Input;
 import build.pluto.output.Out;
+import build.pluto.output.OutputPersisted;
 import build.pluto.stamp.FileContentStamper;
 import build.pluto.stamp.IgnoreOutputStamper;
 import build.pluto.stamp.Stamper;
@@ -69,7 +70,7 @@ public class Bibtex extends Builder<Latex.Input, Out<File>> {
 
     if (!Files.exists(auxPath.toPath())) {
       Log.log.log("No Aux file at " + auxPath + " found", Log.CORE);
-      return new Out<>(null);
+      return OutputPersisted.of(null);
     }
 
     Log.log.log("Bibtex for " + input.docName, Log.IMPORT);
@@ -94,7 +95,7 @@ public class Bibtex extends Builder<Latex.Input, Out<File>> {
     File bbl = FileCommands.replaceExtension(auxPath.toPath(), "bbl").toFile();
     provide(bbl);
 
-    return new Out<>(bbl);
+    return OutputPersisted.of(bbl);
   }
 
 }
