@@ -16,7 +16,6 @@ import org.sugarj.common.Exec.ExecutionResult;
 import org.sugarj.common.Log;
 import org.sugarj.common.util.Pair;
 
-import build.pluto.builder.BuildCycle;
 import build.pluto.builder.Builder;
 import build.pluto.builder.BuilderFactory;
 import build.pluto.builder.CycleSupportFactory;
@@ -31,7 +30,7 @@ import build.pluto.util.AbsoluteComparedFile;
 public class Latex extends Builder<Latex.Input, Out<File>> {
 
   public static BuilderFactory<Input, Out<File>, Latex> factory = BuilderFactory.of(Latex.class, Input.class);
-  public static final CycleSupportFactory latexBibtexCycleSupport = (BuildCycle cycle) -> new FixpointCycleSupport(cycle, Bibtex.factory, Latex.factory);
+  public static final CycleSupportFactory latexBibtexCycleSupport = FixpointCycleSupport.of(Bibtex.factory, Latex.factory);
 
   public static class Input implements Serializable {
     private static final long serialVersionUID = -6065839202426934802L;
