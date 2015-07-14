@@ -14,7 +14,7 @@ import org.sugarj.common.util.Pair;
 import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.BuilderFactory;
-import build.pluto.builder.CycleSupportFactory;
+import build.pluto.builder.CycleHandlerFactory;
 import build.pluto.buildlatex.Latex.Input;
 import build.pluto.output.IgnoreOutputStamper;
 import build.pluto.output.Out;
@@ -32,7 +32,7 @@ public class Bibtex extends Builder<Latex.Input, Out<File>> {
   }
 
   @Override
-  protected CycleSupportFactory getCycleSupport() {
+  protected CycleHandlerFactory getCycleSupport() {
     return Latex.latexBibtexCycleSupport;
   }
 
