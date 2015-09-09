@@ -14,6 +14,7 @@ import org.sugarj.common.util.Pair;
 import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.BuilderFactory;
+import build.pluto.builder.BuilderFactoryFactory;
 import build.pluto.builder.CycleHandlerFactory;
 import build.pluto.buildlatex.Latex.Input;
 import build.pluto.output.IgnoreOutputStamper;
@@ -25,7 +26,7 @@ import build.pluto.stamp.ValueStamp;
 
 public class Bibtex extends Builder<Latex.Input, Out<File>> {
 
-  public final static BuilderFactory<Input, Out<File>, Bibtex> factory = BuilderFactory.of(Bibtex.class, Latex.Input.class);
+  public final static BuilderFactory<Input, Out<File>, Bibtex> factory = BuilderFactoryFactory.of(Bibtex.class, Latex.Input.class);
 
   public Bibtex(Input input) {
     super(input);
