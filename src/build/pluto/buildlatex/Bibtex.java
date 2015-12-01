@@ -43,7 +43,7 @@ public class Bibtex extends Builder<Latex.Input, Out<File>> {
   }
 
   @Override
-  protected File persistentPath(Latex.Input input) {
+  public File persistentPath(Latex.Input input) {
     if (input.targetDir != null)
       return new File(input.targetDir, "bibtex.dep");
     return new File("./bibtex.dep");
