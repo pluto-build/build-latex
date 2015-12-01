@@ -1,4 +1,9 @@
-sudo: required
+sudo: false
+
+addons:
+  apt:
+    packages:
+    - texlive-latex-base
 
 script: |
   # only (attempt to) deploy non-pull request commits
@@ -8,9 +13,6 @@ script: |
     # otherwise, just run test suite
     mvn verify -U --batch-mode
   fi
-
-before_install:
-  - sudo apt-get install -y texlive-latex-base
 
 cache:
   directories:
