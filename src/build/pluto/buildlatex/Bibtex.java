@@ -11,7 +11,6 @@ import org.sugarj.common.FileCommands;
 import org.sugarj.common.Log;
 import org.sugarj.common.util.Pair;
 
-import build.pluto.builder.BuildRequest;
 import build.pluto.builder.Builder;
 import build.pluto.builder.BuilderFactory;
 import build.pluto.builder.BuilderFactoryFactory;
@@ -63,7 +62,7 @@ public class Bibtex extends Builder<Latex.Input, Out<File>> {
       program = input.binaryLocation.getAbsolutePath() + "/" + program;
     }
 
-    requireBuild(new BuildRequest<>(Latex.factory, input, IgnoreOutputStamper.instance));
+    requireBuild(Latex.factory, input, IgnoreOutputStamper.instance);
 
     File auxPath = new File(targetDir, input.docName + ".aux");
     ValueStamp<Pair<Map<String, String>, Set<String>>> bibtexSourceStamp = BibtexAuxStamper.instance.stampOf(auxPath);
