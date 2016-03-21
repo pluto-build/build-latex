@@ -8,7 +8,6 @@ import java.util.Set;
 
 import org.sugarj.common.Exec;
 import org.sugarj.common.FileCommands;
-import org.sugarj.common.Log;
 import org.sugarj.common.util.Pair;
 
 import build.pluto.builder.Builder;
@@ -69,11 +68,11 @@ public class Bibtex extends Builder<Latex.Input, Out<File>> {
     require(auxPath, bibtexSourceStamp);
 
     if (!Files.exists(auxPath.toPath())) {
-      Log.log.log("No Aux file at " + auxPath + " found", Log.CORE);
+      report("No Aux file at " + auxPath + " found");
       return OutputPersisted.of(null);
     }
 
-    Log.log.log("Bibtex for " + input.docName, Log.IMPORT);
+    report("Bibtex for " + input.docName);
 
     Set<String> bibnames = bibtexSourceStamp.val.a.keySet();
 
