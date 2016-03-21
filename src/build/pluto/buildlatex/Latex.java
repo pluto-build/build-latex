@@ -13,14 +13,13 @@ import java.util.Set;
 
 import org.sugarj.common.Exec;
 import org.sugarj.common.Exec.ExecutionResult;
-import org.sugarj.common.Log;
 import org.sugarj.common.util.Pair;
 
 import build.pluto.builder.Builder;
-import build.pluto.builder.BuilderFactory;
-import build.pluto.builder.BuilderFactoryFactory;
 import build.pluto.builder.CycleHandlerFactory;
 import build.pluto.builder.FixpointCycleHandler;
+import build.pluto.builder.factory.BuilderFactory;
+import build.pluto.builder.factory.BuilderFactoryFactory;
 import build.pluto.output.Out;
 import build.pluto.output.OutputPersisted;
 import build.pluto.stamp.FileHashStamper;
@@ -45,7 +44,6 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
       this.srcDir = srcDir;
       this.targetDir = targetDir;
       this.binaryLocation = binaryLocation;
-      Log.log.setLoggingLevel(Log.ALWAYS);
     }
 
   }
@@ -87,7 +85,7 @@ public class Latex extends Builder<Latex.Input, Out<File>> {
     Out<File> bblFileWrapper = requireBuild(Bibtex.factory, input);
     File bblFile = bblFileWrapper.val();
 
-    Log.log.log("Compile Latex " + input.docName, Log.IMPORT);
+    report("Compile Latex " + input.docName);
 
     File tex = new File(srcDir, input.docName + ".tex");
     File aux = new File(targetDir, input.docName + ".aux");

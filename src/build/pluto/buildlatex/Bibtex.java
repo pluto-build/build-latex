@@ -12,9 +12,9 @@ import org.sugarj.common.Log;
 import org.sugarj.common.util.Pair;
 
 import build.pluto.builder.Builder;
-import build.pluto.builder.BuilderFactory;
-import build.pluto.builder.BuilderFactoryFactory;
 import build.pluto.builder.CycleHandlerFactory;
+import build.pluto.builder.factory.BuilderFactory;
+import build.pluto.builder.factory.BuilderFactoryFactory;
 import build.pluto.buildlatex.Latex.Input;
 import build.pluto.output.IgnoreOutputStamper;
 import build.pluto.output.Out;
