@@ -6,22 +6,16 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sugarj.common.FileCommands;
 
 import build.pluto.builder.factory.BuilderFactory;
 import build.pluto.buildlatex.Bibtex;
 import build.pluto.buildlatex.Latex;
-import build.pluto.buildlatex.test.util.TrackingOutputStream;
 import build.pluto.test.build.ScopedBuildTest;
 import build.pluto.test.build.ScopedPath;
 import build.pluto.test.build.TrackingBuildManager;
