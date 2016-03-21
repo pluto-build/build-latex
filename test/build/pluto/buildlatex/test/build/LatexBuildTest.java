@@ -18,6 +18,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sugarj.common.FileCommands;
 
+import build.pluto.builder.factory.BuilderFactory;
+import build.pluto.buildlatex.Bibtex;
 import build.pluto.buildlatex.Latex;
 import build.pluto.buildlatex.test.util.TrackingOutputStream;
 import build.pluto.test.build.ScopedBuildTest;
@@ -35,67 +37,25 @@ public class LatexBuildTest extends ScopedBuildTest {
   @ScopedPath("")
   private File dir;
 
-  private static TrackingOutputStream log;
-  private static PrintStream oldOut;
-
-  @BeforeClass
-  public static void installCapturingSystemOut() {
-    oldOut = System.out;
-    log = new TrackingOutputStream(System.out);
-    System.setOut(new PrintStream(log));
-  }
-
-  @AfterClass
-  public static void resetSystemOut() {
-    System.setOut(oldOut);
-  }
-
   protected static enum Tool {
-
-    LATEX {
-
-      @Override
-      protected String getLog() {
-        return "Compile Latex";
-      }
-
-    },
-    BIBTEX {
-
-      @Override
-      protected String getLog() {
-        return "Bibtex for";
-      }
-
-    };
-    protected abstract String getLog();
+    LATEX,
+    BIBTEX
   }
 
   private void assertOrder(Tool... order) {
-    String logContent = log.getContent();
-
-    // Get indices
-    List<Tool> detectedTools = new ArrayList<>();
-
-    int firstToolIndex;
-    do {
-      firstToolIndex = -1;
-      Tool firstTool = null;
-      for (Tool tool : Tool.values()) {
-        int index = logContent.indexOf(tool.getLog());
-        if (index != -1 && (firstToolIndex == -1 || index < firstToolIndex)) {
-          firstToolIndex = index;
-          firstTool = tool;
-        }
-      }
-      if (firstToolIndex != -1) {
-        detectedTools.add(firstTool);
-        logContent = logContent.substring(firstToolIndex + firstTool.getLog().length());
-      }
-    } while (firstToolIndex != -1);
-
-    assertEquals("Wrong order of executed tools", Arrays.asList(order), detectedTools);
-
+    List<BuilderFactory<?, ?, ?>> executed = manager.getExecutedTools();
+    assertEquals("Wrong number of executed tools", order.length, executed.size());
+    
+    for (int i = 0; i < order.length; i++) {
+      Tool tool = order[i];
+      BuilderFactory<?, ?, ?> fact = executed.get(i);
+      
+      if (tool == LATEX)
+        assertEquals("Wrong order of executed tools", Latex.factory, fact);
+      else if (tool == BIBTEX)
+        assertEquals("Wrong order of executed tools", Bibtex.factory, fact);
+      
+    }
   }
 
   private void assertRebuildDoesNothing() throws IOException {
@@ -118,16 +78,11 @@ public class LatexBuildTest extends ScopedBuildTest {
     replaceInFile(bibFile, find, replace);
   }
 
+  private TrackingBuildManager manager;
   private TrackingBuildManager build() throws IOException {
-    // Forget previous log
-    log.getContent();
     // Do the build
-    File binaryPath = null;
-    if ("moritzlichter".equals(System.getProperty("user.name"))) {
-      binaryPath = new File("/opt/local/bin/");
-    }
-    TrackingBuildManager manager = new TrackingBuildManager();
-    manager.require(Latex.factory, new Latex.Input("document", dir, dir, binaryPath));
+    manager = new TrackingBuildManager();
+    manager.require(Latex.factory, new Latex.Input("document", dir, dir, null));
     return manager;
   }
 
